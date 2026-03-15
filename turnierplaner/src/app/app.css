@@ -1,6 +1,13 @@
 .app-wrapper {
-    text-align: center;
-    align-content: center;
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: space-between;
+}
+
+.content-wrapper {
+  text-align: center;
+  align-content: center;
+  display: flex;
+  flex-direction: column;
 }
