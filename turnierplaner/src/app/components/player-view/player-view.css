@@ -1,0 +1,8 @@
+.player-view-delete-button {
+    visibility: hidden;
+    background-color: red;
+}
+
+.player-view-player:hover .player-view-delete-button {
+    visibility: visible;
+}

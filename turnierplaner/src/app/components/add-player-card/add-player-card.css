@@ -1,0 +1,15 @@
+.add-player-card {
+  width: 70vw;
+}
+
+.add-player-card-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.add-player-card-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}

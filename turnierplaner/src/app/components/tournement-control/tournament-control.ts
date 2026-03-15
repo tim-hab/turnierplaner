@@ -1,0 +1,46 @@
+import { Component, inject } from '@angular/core';
+import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { TournamentService } from '../../services/tournament.service';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-tournament-control',
+  imports: [
+    MatFormFieldModule,
+    MatLabel,
+    MatInputModule,
+    MatButtonModule,
+    MatSlideToggleModule,
+    ReactiveFormsModule,
+  ],
+  templateUrl: './tournament-control.html',
+  styleUrl: './tournament-control.css',
+})
+export class TournamentControl {
+  private tournamentService = inject(TournamentService);
+
+  fieldsControl = new FormControl<number>(4, Validators.required);
+  roundControl = new FormControl<number>(5, Validators.required);
+
+  startTournament() {
+    if (this.fieldsControl.valid && this.roundControl.valid)
+      this.tournamentService.startTournament(this.roundControl.value!, this.fieldsControl.value!);
+  }
+
+  exportCSV() {}
+
+  endTournament() {}
+
+  nextRound() {
+    if (this.fieldsControl.valid) {
+      this.tournamentService.nextRound(this.fieldsControl.value!);
+    }
+  }
+
+  toggleProb() {
+    this.tournamentService.toggleProb();
+  }
+}
