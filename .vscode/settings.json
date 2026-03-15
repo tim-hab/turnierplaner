@@ -1,0 +1,9 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "prettier.configPath": "./turnierplaner/.prettierrc",
+  "prettier.bracketSameLine": true,
+  "prettier.objectWrap": "collapse",
+  "prettier.prettierPath": "./turnierplaner/node_modules/prettier"
+}

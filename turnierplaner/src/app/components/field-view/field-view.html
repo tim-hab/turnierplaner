@@ -1,52 +1,41 @@
 <h2>Aktuelle Runde</h2>
 <div class="field-view-wrapper">
-<mat-card class="field">
-    <mat-card-header>Feld 1</mat-card-header>
-    <mat-card-content class="teams">
+  @for (match of tournamentService.matches(); track match) {
+    <mat-card class="field">
+      <mat-card-header>Feld {{ match.field }}</mat-card-header>
+      <mat-card-content class="teams">
         <mat-list>
-            <mat-list-item>Jan</mat-list-item>
-            <mat-list-item>Tessa</mat-list-item>
+          <mat-list-item>{{ match.teamA[0].name }}</mat-list-item>
+          <mat-list-item>{{ match.teamA[1].name }}</mat-list-item>
         </mat-list>
         <mat-list>
-            <mat-list-item>Armin</mat-list-item>
-            <mat-list-item>Tim</mat-list-item>
+          <mat-list-item>{{ match.teamB[0].name }}</mat-list-item>
+          <mat-list-item>{{ match.teamB[1].name }}</mat-list-item>
         </mat-list>
-    </mat-card-content>
-    <mat-card-actions>
+        @if (tournamentService.showProb()) {
+          <em>Wahrscheinlichkeit: Team A {{ match.prob.A }}% vs Team B {{ match.prob.B }}%</em>
+        }
+      </mat-card-content>
+      <mat-card-actions>
         <mat-form-field>
-            <input matInput>
+          <input matInput #input placeholder="21:15" />
         </mat-form-field>
-        <button matButton="filled">Ergebnisse übertragen</button>
-    </mat-card-actions>
-</mat-card>
-<mat-card class="field">
-    <mat-card-header>Feld 1</mat-card-header>
-    <mat-card-content class="teams">
+        <button matButton="filled" [disabled]="match.completed" (click)="setWinner(match, input)">
+          Ergebnisse übertragen
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+  @if (tournamentService.freePlayers().length > 0) {
+    <mat-card class="field">
+      <mat-card-header>Freilos Spieler Runde {{ tournamentService.round() }}</mat-card-header>
+      <mat-card-content class="teams">
         <mat-list>
-            <mat-list-item>Jan</mat-list-item>
-            <mat-list-item>Tessa</mat-list-item>
+          @for (player of tournamentService.freePlayers(); track player.id) {
+            <mat-list-item>{{ player.name }}</mat-list-item>
+          }
         </mat-list>
-        <mat-list>
-            <mat-list-item>Armin</mat-list-item>
-            <mat-list-item>Tim</mat-list-item>
-        </mat-list>
-    </mat-card-content>
-    <mat-card-actions>
-        <mat-form-field>
-            <input matInput>
-        </mat-form-field>
-        <button matButton="filled">Ergebnisse übertragen</button>
-    </mat-card-actions>
-</mat-card>
-<mat-card class="field">
-    <mat-card-header>Freilos Spieler Runde 1</mat-card-header>
-    <mat-card-content class="teams">
-        <mat-list>
-            <mat-list-item>Jan</mat-list-item>
-            <mat-list-item>Tessa</mat-list-item>
-            <mat-list-item>Armin</mat-list-item>
-            <mat-list-item>Tim</mat-list-item>
-        </mat-list>
-    </mat-card-content>
-</mat-card>
+      </mat-card-content>
+    </mat-card>
+  }
 </div>

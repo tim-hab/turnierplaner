@@ -2,29 +2,29 @@
   <div class="tournament-control-fields">
     <mat-form-field>
       <mat-label>Felder:</mat-label>
-      <input matInput type="number" value="4" min="1" />
+      <input matInput type="number" min="1" [formControl]="fieldsControl" />
     </mat-form-field>
     <mat-form-field>
       <mat-label>Runden gesamt:</mat-label>
-      <input matInput type="number" value="5" min="1" />
+      <input matInput type="number" min="1" [formControl]="roundControl" />
     </mat-form-field>
   </div>
   <div class="tournament-control-buttons">
-    <button matButton="filled" class="btn btn-success" onclick="startTournament()">
+    <button matButton="filled" class="btn btn-success" (click)="startTournament()">
       ▶️ Turnier starten
     </button>
-    <button matButton="filled" class="btn btn-warning" onclick="nextRound()">
+    <button matButton="filled" class="btn btn-warning" (click)="nextRound()">
       🔄 Nächste Runde
     </button>
-    <button matButton="filled" class="btn btn-danger" onclick="endTournament()">
+    <button matButton="filled" class="btn btn-danger" (click)="endTournament()">
       ⏹️ Turnier beenden
     </button>
-    <button matButton="filled" class="btn btn-secondary" onclick="exportCSV()">
+    <button matButton="filled" class="btn btn-secondary" (click)="exportCSV()">
       📥 Export CSV
     </button>
   </div>
   <div class="tournament-control-prob">
-    <mat-slide-toggle class="form-check-input" type="slider" id="showProb" onchange="renderMatches()" />
+    <mat-slide-toggle class="form-check-input" type="slider" id="showProb" (click)="toggleProb()" />
     <label class="form-check-label" for="showProb">Siegwahrscheinlichkeit anzeigen</label>
   </div>
 </div>
