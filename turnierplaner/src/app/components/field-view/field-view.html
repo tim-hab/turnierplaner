@@ -1,17 +1,20 @@
 <h2>Aktuelle Runde</h2>
 <div class="field-view-wrapper">
-  @for (match of tournamentService.matches(); track match) {
+  @for (match of tournamentService.matches(); track match.id) {
     <mat-card class="field">
       <mat-card-header>Feld {{ match.field }}</mat-card-header>
       <mat-card-content class="teams">
-        <mat-list>
+        <mat-list [id]="'teamA' + match.id">
+          <label [for]="'teamA' + match.id">Team A</label>
           <mat-list-item>{{ match.teamA[0].name }}</mat-list-item>
           <mat-list-item>{{ match.teamA[1].name }}</mat-list-item>
         </mat-list>
-        <mat-list>
+        <mat-list [id]="'teamB' + match.id">
+          <label [for]="'teamB' + match.id">Team B</label>
           <mat-list-item>{{ match.teamB[0].name }}</mat-list-item>
           <mat-list-item>{{ match.teamB[1].name }}</mat-list-item>
         </mat-list>
+
         @if (tournamentService.showProb()) {
           <em>Wahrscheinlichkeit: Team A {{ match.prob.A }}% vs Team B {{ match.prob.B }}%</em>
         }

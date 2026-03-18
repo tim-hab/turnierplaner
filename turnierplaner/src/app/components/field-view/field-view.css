@@ -1,15 +1,19 @@
 .teams {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .field-view-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .field {
-    margin: 10px;
+  margin: 10px;
+}
+
+label {
+  text-align: center;
 }

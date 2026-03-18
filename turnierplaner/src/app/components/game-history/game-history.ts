@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatAnchor } from '@angular/material/button';
-import { Match, TournamentService } from '../../services/tournament.service';
-import { Player } from '../../services/player.service';
+import { TournamentService } from '../../services/tournament.service';
+import { Player } from '../../datatypes/player';
+import { Match } from '../../datatypes/Match';
 
 export interface Game {
   round: number;

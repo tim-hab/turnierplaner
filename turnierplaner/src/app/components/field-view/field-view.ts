@@ -4,7 +4,8 @@ import { MatList, MatListItem } from '@angular/material/list';
 import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatAnchor } from '@angular/material/button';
-import { Match, TournamentService } from '../../services/tournament.service';
+import { TournamentService } from '../../services/tournament.service';
+import { Match } from '../../datatypes/Match';
 
 @Component({
   selector: 'app-field-view',

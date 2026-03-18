@@ -1,17 +1,21 @@
 import { Injectable, linkedSignal } from '@angular/core';
+import { Player } from '../datatypes/player';
 
-export interface Player {
-  id: number;
-  name: string;
-  club: string;
-  elo: number;
-  wins: number;
-  losses: number;
-  frees: number;
-  played: number;
-}
-
-const mockPlayer = ['Armin', 'Tim', 'TEssa', 'Jan'];
+const mockPlayer = [
+  'Armin',
+  'Tim',
+  'TEssa',
+  'Jan',
+  'Jana',
+  'Martin',
+  'Felix',
+  'Tom',
+  'Sonja',
+  'Emily',
+  'Celine',
+  'Tobias',
+  'Andreas',
+];
 
 const mockClubs = ['SuS Westenholz', 'Boke'];
 
@@ -49,7 +53,7 @@ export class PlayerService {
     this.clubs.update((l) => [...l, name]);
   }
 
-  updatePlayer(p: Player, win: boolean, factor: number) {
+  updatePlayerWinsLosses(p: Player, win: boolean, factor: number) {
     this.player.update((player) => {
       const i = player.findIndex((g) => g.id == p.id);
       if (win) {
@@ -61,6 +65,14 @@ export class PlayerService {
         player[i].played++;
         player[i].elo -= 10 * (1 + factor);
       }
+      return [...player];
+    });
+  }
+
+  updatePlayerFrees(p: Player) {
+    this.player.update((player) => {
+      const i = player.findIndex((g) => g.id == p.id);
+      player[i].frees++;
       return [...player];
     });
   }
