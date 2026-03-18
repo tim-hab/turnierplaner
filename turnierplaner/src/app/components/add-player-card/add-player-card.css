@@ -1,15 +1,27 @@
 .add-player-card {
-  width: 70vw;
+  width: 100%;
+}
+
+form {
+  width: 100%;
 }
 
 .add-player-card-content {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-evenly;
+  margin-top: 10px;
 }
 
 .add-player-card-wrapper {
   display: flex;
   align-items: center;
   flex-direction: column;
+  width: 100%;
+}
+
+.add-player-card-actions {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
 }

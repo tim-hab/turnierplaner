@@ -1,4 +1,15 @@
 <div class="app-wrapper">
-<h1>Badminton JuxTurnier-App</h1>
-<app-control/>
+  <div class="sidebar-wrapper">
+    <app-sidebar (activeRoute)="activeRoute.set($event)"></app-sidebar>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="header">
+      <h1>Badminton JuxTurnier-App</h1>
+      <app-tournament-control></app-tournament-control>
+    </div>
+    <app-control [activeRoute]="activeRoute()" />
+  </div>
+
+  <div class="live-wrapper"></div>
 </div>
