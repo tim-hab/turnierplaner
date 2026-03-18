@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatList, MatListItem } from '@angular/material/list';
-import { MatAnchor, MatButtonModule } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { PlayerService } from '../../services/player.service';
 

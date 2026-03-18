@@ -1,4 +1,4 @@
-import { Injectable, linkedSignal, signal, Signal } from '@angular/core';
+import { Injectable, linkedSignal } from '@angular/core';
 
 export interface Player {
   id: number;
@@ -13,13 +13,15 @@ export interface Player {
 
 const mockPlayer = ['Armin', 'Tim', 'TEssa', 'Jan'];
 
+const mockClubs = ['SuS Westenholz', 'Boke'];
+
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerService {
   private newID = 0;
   player = linkedSignal<Player[]>(() => []);
-  clubs = linkedSignal<string[]>(() => []);
+  clubs = linkedSignal<string[]>(() => mockClubs);
 
   constructor() {
     for (const player of mockPlayer) {

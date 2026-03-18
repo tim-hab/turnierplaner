@@ -30,9 +30,13 @@ export class TournamentControl {
       this.tournamentService.startTournament(this.roundControl.value!, this.fieldsControl.value!);
   }
 
-  exportCSV() {}
+  exportCSV() {
+    /* empty */
+  }
 
-  endTournament() {}
+  endTournament() {
+    /* empty */
+  }
 
   nextRound() {
     if (this.fieldsControl.valid) {

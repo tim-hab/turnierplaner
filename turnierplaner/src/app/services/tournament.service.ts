@@ -46,9 +46,9 @@ export class TournamentService {
   }
 
   calcProbability(teamA: Player[], teamB: Player[]) {
-    let eloA = teamA[0].elo + teamA[1].elo;
-    let eloB = teamB[0].elo + teamB[1].elo;
-    let probA = 1 / (1 + 10 ** ((eloB - eloA) / 400));
+    const eloA = teamA[0].elo + teamA[1].elo;
+    const eloB = teamB[0].elo + teamB[1].elo;
+    const probA = 1 / (1 + 10 ** ((eloB - eloA) / 400));
     return { A: (probA * 100).toFixed(0), B: ((1 - probA) * 100).toFixed(0) };
   }
 
@@ -56,8 +56,8 @@ export class TournamentService {
     const newMatches: Match[] = [];
     const activePlayers = [...this.playerService.player()].sort((a, b) => a.frees - b.frees);
     while (activePlayers.length >= 4 && newMatches.length < this.fields) {
-      let teamA = [activePlayers.shift()!, activePlayers.pop()!];
-      let teamB = [activePlayers.shift()!, activePlayers.pop()!];
+      const teamA = [activePlayers.shift()!, activePlayers.pop()!];
+      const teamB = [activePlayers.shift()!, activePlayers.pop()!];
       newMatches.push({
         id: this.newID++,
         round: this.round(),
@@ -69,8 +69,8 @@ export class TournamentService {
         completed: false,
       });
     }
-    this.matches.update((l) => [...newMatches]);
-    this.freePlayers.update((l) => [...activePlayers]);
+    this.matches.update(() => [...newMatches]);
+    this.freePlayers.update(() => [...activePlayers]);
   }
 
   setWinner(match: Match, teamA: number, teamB: number) {
@@ -102,7 +102,10 @@ export class TournamentService {
     this.history.update((h) => [...h, match]);
   }
 
-  changeScore(match: Match, newScore: { A: number; B: number }) {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  changeScore(match: Match, newScore: { A: number; B: number }) {
+    /* empty */
+  }
 
   toggleProb() {
     this.showProb.update((prob) => !prob);
