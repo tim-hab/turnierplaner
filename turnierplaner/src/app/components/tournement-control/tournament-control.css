@@ -1,0 +1,20 @@
+.tournament-control-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 10px;
+}
+
+.tournament-control-fields {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.tournament-control-buttons {
+  width: 100%;
+  justify-content: space-evenly;
+  display: flex;
+  margin-bottom: 10px;
+}

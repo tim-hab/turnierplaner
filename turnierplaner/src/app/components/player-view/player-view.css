@@ -1,8 +1,14 @@
 .player-view-delete-button {
-    visibility: hidden;
-    background-color: red;
+  visibility: hidden;
+  background-color: red;
 }
 
 .player-view-player:hover .player-view-delete-button {
-    visibility: visible;
+  visibility: visible;
+}
+
+.app-player-view-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

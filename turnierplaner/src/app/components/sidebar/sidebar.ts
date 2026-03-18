@@ -19,4 +19,8 @@ export class Sidebar {
   showFields() {
     this.activeRoute.emit(Route.FieldView);
   }
+
+  showTable() {
+    this.activeRoute.emit(Route.TableView);
+  }
 }
