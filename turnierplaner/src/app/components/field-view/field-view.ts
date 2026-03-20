@@ -25,6 +25,7 @@ import { Match } from '../../datatypes/Match';
 })
 export class FieldView {
   tournamentService = inject(TournamentService);
+  round = Math.round;
 
   setWinner(match: Match, input: HTMLInputElement) {
     const score = input.value;

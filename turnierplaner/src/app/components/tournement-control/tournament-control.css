@@ -18,3 +18,7 @@
   display: flex;
   margin-bottom: 10px;
 }
+
+.tournament-control-slider * {
+  padding: 5px;
+}

@@ -1,5 +1,6 @@
 import { Injectable, linkedSignal } from '@angular/core';
 import { Player } from '../datatypes/player';
+import { Match } from '../datatypes/Match';
 
 const mockPlayer = [
   'Armin',
@@ -29,7 +30,7 @@ export class PlayerService {
 
   constructor() {
     for (const player of mockPlayer) {
-      this.addNewPlayer(player, 'SuS', 5);
+      this.addNewPlayer(player, 'SuS', Math.random() * 1000);
     }
   }
 
@@ -40,7 +41,7 @@ export class PlayerService {
         id: this.newID++,
         name: name,
         club: club,
-        elo: elo * 100,
+        elo: elo,
         wins: 0,
         losses: 0,
         frees: 0,
@@ -53,27 +54,54 @@ export class PlayerService {
     this.clubs.update((l) => [...l, name]);
   }
 
-  updatePlayerWinsLosses(p: Player, win: boolean, factor: number) {
-    this.player.update((player) => {
-      const i = player.findIndex((g) => g.id == p.id);
-      if (win) {
-        player[i].wins++;
-        player[i].played++;
-        player[i].elo += 20 * (1 + factor);
+  updatePlayerAndCalculateElo(match: Match, teamA: number, teamB: number, Kbasis: number) {
+    const eloGesamtA = (match.teamA[0].elo + match.teamA[1].elo) / 2;
+    const eloGesamtB = (match.teamB[0].elo + match.teamB[1].elo) / 2;
+
+    const probA = 1.0 / ((1.0 + 10) ^ ((eloGesamtB - eloGesamtA) / 400.0));
+    const probB = 1.0 / ((1.0 + 10) ^ ((eloGesamtA - eloGesamtB) / 400.0));
+
+    let ergebnisA, ergebnisB;
+    if (teamA > teamB) {
+      ergebnisA = 1;
+      ergebnisB = 0;
+    } else {
+      ergebnisA = 0;
+      ergebnisB = 1;
+    }
+
+    const Keff = Kbasis * (1 + Math.abs(teamA - teamB) / 10);
+
+    const eloAenderungA = Keff * (ergebnisA - probA);
+    const eloAenderungB = Keff * (ergebnisB - probB);
+
+    match.teamA.forEach((p) => {
+      if (ergebnisA) {
+        p.wins++;
       } else {
-        player[i].wins++;
-        player[i].played++;
-        player[i].elo -= 10 * (1 + factor);
+        p.losses++;
       }
-      return [...player];
+      p.played++;
+      p.elo += eloAenderungA;
     });
+
+    match.teamB.forEach((p) => {
+      if (ergebnisB) {
+        p.wins++;
+      } else {
+        p.losses++;
+      }
+      p.played++;
+      p.elo += eloAenderungB;
+    });
+
+    this.player.update((l) => [...l]);
   }
 
-  updatePlayerFrees(p: Player) {
-    this.player.update((player) => {
-      const i = player.findIndex((g) => g.id == p.id);
-      player[i].frees++;
-      return [...player];
+  updatePlayerFrees(list: Player[]) {
+    list.forEach((p) => {
+      p.frees++;
     });
+    this.player.update((l) => [...l]);
   }
 }

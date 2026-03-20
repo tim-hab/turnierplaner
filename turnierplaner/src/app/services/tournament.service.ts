@@ -1,7 +1,7 @@
 import { inject, Injectable, linkedSignal } from '@angular/core';
 import { PlayerService } from './player.service';
 import { Player, sortByElo, sortByFrees } from '../datatypes/player';
-import { Match, newMatch, Team } from '../datatypes/Match';
+import { Algorithm, Match, newMatch, Team } from '../datatypes/Match';
 
 @Injectable({
   providedIn: 'root',
@@ -11,41 +11,54 @@ export class TournamentService {
   private playerService = inject(PlayerService);
   private totalRounds = 5;
   private fields = 4;
+  private Kbasis = 32;
+
   round = linkedSignal<number>(() => 1);
   matches = linkedSignal<Match[]>(() => []);
   freePlayers = linkedSignal<Player[]>(() => []);
   history = linkedSignal<Match[]>(() => []);
   showProb = linkedSignal<boolean>(() => false);
 
-  startTournament(totalRounds: number, fields: number) {
+  startTournament(
+    totalRounds: number,
+    fields: number,
+    eloMod?: number,
+    algorithm?: Algorithm,
+    Kbasis?: number,
+  ) {
     if (this.playerService.player().length < 4) return alert('Mindestens 4 Spieler!');
     this.fields = fields;
     this.totalRounds = totalRounds;
-    this.generateMatches();
+    this.generateMatches(eloMod, algorithm, Kbasis);
   }
 
-  nextRound(fields: number) {
+  nextRound(fields: number, eloMod?: number, algorithm?: Algorithm, Kbasis?: number) {
     if (this.round() >= this.totalRounds) {
       alert('Maximale Runden erreicht');
       return;
     }
     this.round.set(this.round() + 1);
     this.fields = fields;
-    this.freePlayers().forEach((p) => this.playerService.updatePlayerFrees(p));
-    this.generateMatches();
-    alert('Runde ' + this.round + ' gestartet!');
+    this.playerService.updatePlayerFrees(this.freePlayers());
+    this.generateMatches(eloMod, algorithm, Kbasis);
   }
 
-  generateMatches() {
+  generateMatches(eloMod?: number, algorithm?: Algorithm, Kbasis?: number) {
+    this.Kbasis = Kbasis ?? 32;
     const activePlayers = [...this.playerService.player()].sort(sortByFrees);
     if (activePlayers.length / 4 < this.fields) {
       this.fields = Math.floor(activePlayers.length / 4);
     }
-    const player = activePlayers.slice(undefined, 4 * this.fields).sort(sortByElo);
+    const player = activePlayers.slice(undefined, 4 * this.fields).sort(sortByElo(eloMod));
     const frees = activePlayers.slice(4 * this.fields);
     let data: { player: Player[]; newMatches: Match[] };
 
-    const random = Math.random() * 3;
+    let random = Math.random() * 3;
+
+    if (algorithm) {
+      random = algorithm;
+    }
+
     if (random > 2) {
       data = this.homogenMatches(player);
       console.log('homogen');
@@ -101,21 +114,7 @@ export class TournamentService {
       const i = l.findIndex((m) => m.id == match.id);
       l[i].score = { A: teamA, B: teamB };
       l[i].completed = true;
-      const factor = Math.abs(teamA - teamB) / 21;
-      let winnerTeam, loserTeam;
-      if (teamA > teamB) {
-        winnerTeam = match.teamA;
-        loserTeam = match.teamB;
-      } else {
-        winnerTeam = match.teamB;
-        loserTeam = match.teamA;
-      }
-      winnerTeam.forEach((p) => {
-        this.playerService.updatePlayerWinsLosses(p, true, factor);
-      });
-      loserTeam.forEach((p) => {
-        this.playerService.updatePlayerWinsLosses(p, false, factor);
-      });
+      this.playerService.updatePlayerAndCalculateElo(match, teamA, teamB, this.Kbasis);
       this.updateHistory(l[i]);
       return [...l];
     });

@@ -1,34 +1,56 @@
 <h2>Aktuelle Runde</h2>
 <div class="field-view-wrapper">
-  @for (match of tournamentService.matches(); track match.id) {
-    <mat-card class="field">
-      <mat-card-header>Feld {{ match.field }}</mat-card-header>
-      <mat-card-content class="teams">
-        <mat-list [id]="'teamA' + match.id">
-          <label [for]="'teamA' + match.id">Team A</label>
-          <mat-list-item>{{ match.teamA[0].name }}</mat-list-item>
-          <mat-list-item>{{ match.teamA[1].name }}</mat-list-item>
-        </mat-list>
-        <mat-list [id]="'teamB' + match.id">
-          <label [for]="'teamB' + match.id">Team B</label>
-          <mat-list-item>{{ match.teamB[0].name }}</mat-list-item>
-          <mat-list-item>{{ match.teamB[1].name }}</mat-list-item>
-        </mat-list>
-
-        @if (tournamentService.showProb()) {
-          <em>Wahrscheinlichkeit: Team A {{ match.prob.A }}% vs Team B {{ match.prob.B }}%</em>
-        }
-      </mat-card-content>
-      <mat-card-actions>
-        <mat-form-field>
-          <input matInput #input placeholder="21:15" />
-        </mat-form-field>
-        <button matButton="filled" [disabled]="match.completed" (click)="setWinner(match, input)">
-          Ergebnisse übertragen
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  }
+  <div class="fields">
+    @for (match of tournamentService.matches(); track match.id) {
+      <mat-card class="field">
+        <mat-card-header>Feld {{ match.field }}</mat-card-header>
+        <mat-card-content class="teams">
+          <mat-list [id]="'teamA' + match.id">
+            <label [for]="'teamA' + match.id">Team A</label>
+            @if (tournamentService.showProb()) {
+              <p>
+                <em>{{ match.prob.A }}%</em>
+              </p>
+              <mat-list-item
+                >{{ match.teamA[0].name }} ({{ round(match.teamA[0].elo) }})</mat-list-item
+              >
+              <mat-list-item
+                >{{ match.teamA[1].name }} ({{ round(match.teamA[1].elo) }})</mat-list-item
+              >
+            } @else {
+              <mat-list-item>{{ match.teamA[0].name }}</mat-list-item>
+              <mat-list-item>{{ match.teamA[1].name }}</mat-list-item>
+            }
+          </mat-list>
+          <mat-list [id]="'teamB' + match.id">
+            <label [for]="'teamB' + match.id">Team B</label>
+            @if (tournamentService.showProb()) {
+              <p>
+                <em>{{ match.prob.B }}%</em>
+              </p>
+              <mat-list-item
+                >{{ match.teamB[0].name }} ({{ round(match.teamB[0].elo) }})</mat-list-item
+              >
+              <mat-list-item
+                >{{ match.teamB[1].name }} ({{ round(match.teamB[1].elo) }})</mat-list-item
+              >
+            } @else {
+              <mat-list-item>{{ match.teamB[0].name }}</mat-list-item>
+              <mat-list-item>{{ match.teamB[1].name }}</mat-list-item>
+            }
+          </mat-list>
+        </mat-card-content>
+        <mat-card-actions>
+          <mat-form-field>
+            <input matInput #input placeholder="21:15" />
+          </mat-form-field>
+          <button matButton="filled" [disabled]="match.completed" (click)="setWinner(match, input)">
+            Ergebnisse übertragen
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
   @if (tournamentService.freePlayers().length > 0) {
     <mat-card class="field">
       <mat-card-header>Freilos Spieler Runde {{ tournamentService.round() }}</mat-card-header>

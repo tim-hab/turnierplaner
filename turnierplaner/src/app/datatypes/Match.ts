@@ -26,6 +26,13 @@ export function newMatch(id: number, round: number, field: number, teamA: Team, 
   } as Match;
 }
 
+export enum Algorithm {
+  random,
+  firstWithLast,
+  heterogen,
+  homogen,
+}
+
 function calcProbability(teamA: Player[], teamB: Player[]) {
   const eloA = teamA[0].elo + teamA[1].elo;
   const eloB = teamB[0].elo + teamB[1].elo;

@@ -17,3 +17,10 @@
 label {
   text-align: center;
 }
+
+.fields {
+  display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 50vw;
+  justify-content: space-evenly;
+}

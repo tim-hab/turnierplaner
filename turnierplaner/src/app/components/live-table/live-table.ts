@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { PlayerService } from '../../services/player.service';
-import { sortByElo } from '../../datatypes/player';
+import { sortByWinsTheanElo } from '../../datatypes/player';
 
 @Component({
   selector: 'app-live-table',
@@ -11,7 +11,8 @@ import { sortByElo } from '../../datatypes/player';
   styleUrl: './live-table.css',
 })
 export class LiveTable {
-  displayedColumns = ['player', 'club', 'elo', 'wins', 'losses'];
+  displayedColumns = ['player', 'club', 'elo', 'wins', 'losses', 'frees', 'played'];
   playerService = inject(PlayerService);
-  sortByElo = sortByElo;
+  sortByElo = sortByWinsTheanElo;
+  round = Math.round;
 }

@@ -24,7 +24,7 @@ export class AddPlayerCard {
   form = new FormGroup({
     nameControl: new FormControl<string>('', Validators.required),
     clubControl: new FormControl<string>('', Validators.required),
-    eloControl: new FormControl<number>(5),
+    eloControl: new FormControl<number>(500, Validators.required),
   });
 
   playerService = inject(PlayerService);
