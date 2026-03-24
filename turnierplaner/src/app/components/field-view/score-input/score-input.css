@@ -1,0 +1,22 @@
+.custom-score-input-container {
+  display: flex;
+}
+
+.custom-score-input-element {
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
+  font: inherit;
+  text-align: center;
+  color: currentcolor;
+}
+
+.custom-score-input-spacer {
+  opacity: 0;
+  transition: opacity 200ms;
+}
+
+:host.example-floating .custom-score-input-spacer {
+  opacity: 1;
+}

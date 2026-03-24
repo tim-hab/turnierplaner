@@ -1,0 +1,33 @@
+<div
+  role="group"
+  class="custom-score-input-container"
+  [formGroup]="score"
+  [attr.aria-labelledby]="_formField?.getLabelId()"
+  (focusin)="onFocusIn()"
+  (focusout)="onFocusOut($event)"
+>
+  <input
+    class="custom-score-input-element"
+    formControlName="teamA"
+    size="2"
+    maxLength="2"
+    aria-label="Points Team A"
+    (input)="_handleInput(score.controls.teamA, teamB)"
+    inputmode="numeric"
+    [readOnly]="_readonly()"
+    #teamA
+  />
+  <span class="custom-score-input-spacer">:</span>
+  <input
+    class="custom-score-input-element"
+    formControlName="teamB"
+    maxLength="2"
+    size="2"
+    aria-label="Points Team B"
+    (input)="_handleInput(score.controls.teamB)"
+    (keyup.backspace)="autoFocusPrev(score.controls.teamB, teamA)"
+    inputmode="numeric"
+    [readOnly]="_readonly()"
+    #teamB
+  />
+</div>
