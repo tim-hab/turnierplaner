@@ -34,8 +34,8 @@ export enum Algorithm {
 }
 
 function calcProbability(teamA: Player[], teamB: Player[]) {
-  const eloA = teamA[0].elo + teamA[1].elo;
-  const eloB = teamB[0].elo + teamB[1].elo;
+  const eloA = (teamA[0].elo + teamA[1].elo) / 2;
+  const eloB = (teamB[0].elo + teamB[1].elo) / 2;
   const probA = 1 / (1 + 10 ** ((eloB - eloA) / 400));
   return { A: (probA * 100).toFixed(0), B: ((1 - probA) * 100).toFixed(0) };
 }

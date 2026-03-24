@@ -30,7 +30,7 @@ export class PlayerService {
 
   constructor() {
     for (const player of mockPlayer) {
-      this.addNewPlayer(player, 'SuS', Math.random() * 1000);
+      this.addNewPlayer(player, 'SuS', Math.random() * 100 + 500);
     }
   }
 
@@ -58,8 +58,8 @@ export class PlayerService {
     const eloGesamtA = (match.teamA[0].elo + match.teamA[1].elo) / 2;
     const eloGesamtB = (match.teamB[0].elo + match.teamB[1].elo) / 2;
 
-    const probA = 1.0 / ((1.0 + 10) ^ ((eloGesamtB - eloGesamtA) / 400.0));
-    const probB = 1.0 / ((1.0 + 10) ^ ((eloGesamtA - eloGesamtB) / 400.0));
+    const probA = 1.0 / (1.0 + 10 ** ((eloGesamtB - eloGesamtA) / 400.0));
+    const probB = 1.0 / (1.0 + 10 ** ((eloGesamtA - eloGesamtB) / 400.0));
 
     let ergebnisA, ergebnisB;
     if (teamA > teamB) {

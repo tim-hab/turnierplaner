@@ -2,13 +2,14 @@ import { Component, inject, output } from '@angular/core';
 import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TournamentService } from '../../services/tournament.service';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Route } from '../../app.routes';
 import { MatSelectModule } from '@angular/material/select';
 import { Algorithm } from '../../datatypes/Match';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-tournament-control',
@@ -21,6 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ReactiveFormsModule,
     MatSelectModule,
     MatTooltipModule,
+    MatIcon,
   ],
   templateUrl: './tournament-control.html',
   styleUrl: './tournament-control.css',
@@ -38,6 +40,7 @@ export class TournamentControl {
 
   Algorithm = Algorithm;
   matchMaking = false;
+  collapsed = false;
 
   startTournament() {
     if (this.fieldsControl.valid && this.roundControl.valid) {
@@ -94,7 +97,14 @@ export class TournamentControl {
     this.tournamentService.toggleProb();
   }
 
-  toggleMatchMaking() {
-    this.matchMaking = !this.matchMaking;
+  toggleMatchMaking(e: MatSlideToggleChange) {
+    this.matchMaking = e.checked;
+    if (e.checked) {
+      this.collapsed = false;
+    }
+  }
+
+  toggleCollapsed() {
+    this.collapsed = !this.collapsed;
   }
 }
