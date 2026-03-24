@@ -47,6 +47,7 @@ export class PlayerService {
         frees: 0,
         played: 0,
         points: 0,
+        active: true,
       },
     ]);
   }
@@ -109,6 +110,11 @@ export class PlayerService {
     list.forEach((p) => {
       p.frees++;
     });
+    this.player.update((l) => [...l]);
+  }
+
+  toggleActivePlayer(p: Player) {
+    p.active = !p.active;
     this.player.update((l) => [...l]);
   }
 }

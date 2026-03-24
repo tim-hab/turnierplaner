@@ -45,7 +45,9 @@ export class TournamentService {
 
   generateMatches(eloMod?: number, algorithm?: Algorithm, Kbasis?: number) {
     this.Kbasis = Kbasis ?? 32;
-    const activePlayers = [...this.playerService.player()].sort(sortByFrees);
+    const activePlayers = [...this.playerService.player().filter((p) => p.active)].sort(
+      sortByFrees,
+    );
     if (activePlayers.length / 4 < this.fields) {
       this.fields = Math.floor(activePlayers.length / 4);
     }
