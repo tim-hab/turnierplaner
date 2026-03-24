@@ -16,6 +16,12 @@ export function sortByFrees(a: Player, b: Player) {
   return first;
 }
 
+export function sortByPlayedThenFrees(a: Player, b: Player) {
+  const first = a.played - b.played;
+  if (first) return first;
+  else return sortByFrees(a, b);
+}
+
 /**
  *
  * @param eloMod Defines the randomness sorting by elo, a higher value means a lower elo could be at a higher position in the list. Standard Value is 50;

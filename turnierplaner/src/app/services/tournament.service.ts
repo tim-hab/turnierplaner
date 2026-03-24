@@ -1,6 +1,6 @@
 import { inject, Injectable, linkedSignal } from '@angular/core';
 import { PlayerService } from './player.service';
-import { Player, sortByElo, sortByFrees } from '../datatypes/player';
+import { Player, sortByElo, sortByPlayedThenFrees } from '../datatypes/player';
 import { Algorithm, Match, newMatch, Team } from '../datatypes/Match';
 
 @Injectable({
@@ -46,7 +46,7 @@ export class TournamentService {
   generateMatches(eloMod?: number, algorithm?: Algorithm, Kbasis?: number) {
     this.Kbasis = Kbasis ?? 32;
     const activePlayers = [...this.playerService.player().filter((p) => p.active)].sort(
-      sortByFrees,
+      sortByPlayedThenFrees,
     );
     if (activePlayers.length / 4 < this.fields) {
       this.fields = Math.floor(activePlayers.length / 4);
@@ -112,14 +112,10 @@ export class TournamentService {
   }
 
   setWinner(match: Match, teamA: number, teamB: number) {
-    this.matches.update((l) => {
-      const i = l.findIndex((m) => m.id == match.id);
-      l[i].score = { A: teamA, B: teamB };
-      l[i].completed = true;
-      this.playerService.updatePlayerAndCalculateElo(match, teamA, teamB, this.Kbasis);
-      this.updateHistory(l[i]);
-      return [...l];
-    });
+    match.score = { A: teamA, B: teamB };
+    match.completed = true;
+    this.playerService.updatePlayerAndCalculateElo(match, teamA, teamB, this.Kbasis);
+    this.updateHistory(match);
   }
 
   updateHistory(match: Match) {
