@@ -16,7 +16,8 @@
           <mat-error>Feld darf nicht leer sein!</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <input matInput type="number" min="0" [formControlName]="'eloControl'" />
+          <input matInput type="number" min="0" step="100" [formControlName]="'eloControl'" />
+          <mat-error>Feld darf nicht leer sein!</mat-error>
         </mat-form-field>
       </mat-card-content>
       <mat-card-actions class="add-player-card-actions">

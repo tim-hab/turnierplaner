@@ -1,14 +1,16 @@
 <div class="tournament-control-wrapper">
-  <div class="tournament-control-fields">
-    <mat-form-field>
-      <mat-label>Felder:</mat-label>
-      <input matInput type="number" min="1" [formControl]="fieldsControl" />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Runden gesamt:</mat-label>
-      <input matInput type="number" min="1" [formControl]="roundControl" />
-    </mat-form-field>
-  </div>
+  @if (!collapsed) {
+    <div class="tournament-control-fields">
+      <mat-form-field>
+        <mat-label>Felder:</mat-label>
+        <input matInput type="number" min="1" [formControl]="fieldsControl" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Runden gesamt:</mat-label>
+        <input matInput type="number" min="1" [formControl]="roundControl" />
+      </mat-form-field>
+    </div>
+  }
   <div class="tournament-control-buttons">
     <button matButton="filled" class="btn btn-success" (click)="startTournament()">
       ▶️ Turnier starten
@@ -23,8 +25,72 @@
       📥 Export CSV
     </button>
   </div>
-  <div class="tournament-control-prob">
+  <div class="tournament-control-slider">
     <mat-slide-toggle class="form-check-input" type="slider" id="showProb" (click)="toggleProb()" />
     <label class="form-check-label" for="showProb">Siegwahrscheinlichkeit anzeigen</label>
+    <mat-slide-toggle
+      class="form-check-input"
+      type="slider"
+      id="showMatchMaking"
+      (change)="toggleMatchMaking($event)"
+    />
+    <label class="form-check-label" for="showMatchMaking">MatchMaking anpassen</label>
   </div>
+  @if (matchMaking && !collapsed) {
+    <div class="tournament-control-fields">
+      <mat-form-field>
+        <mat-select [formControl]="algorithmControl">
+          <mat-option
+            [value]="Algorithm.random"
+            matTooltip="Zufälliger Algorithmus wird verwendet"
+            matTooltipPosition="right"
+            >zufällige Option</mat-option
+          >
+          <mat-option
+            [value]="Algorithm.homogen"
+            matTooltip="Gleich starke Spieler spielen mit- und gegeneinander"
+            matTooltipPosition="right"
+            >homogen</mat-option
+          >
+          <mat-option
+            [value]="Algorithm.heterogen"
+            matTooltip="Der stärkste Spieler spielt mit dem schwächsten gegen ein mittelstarkes Team"
+            matTooltipPosition="right"
+            >heterogen</mat-option
+          >
+          <mat-option
+            [value]="Algorithm.firstWithLast"
+            matTooltip="Der stärkste Spieler spielt mit dem schwächsten gegen den Zweiten und Vorletzten"
+            matTooltipPosition="right"
+            >Erster mit Letztem</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field
+        matTooltip="Weicht die Sortierung nach Elo auf, je höher der Wert desto ungleicher die Teams in Bezug auf das Elo"
+      >
+        <mat-label>Zufallsmodifikator für ELO</mat-label>
+        <input matInput type="number" min="0" [formControl]="eloModControl" />
+      </mat-form-field>
+      <mat-form-field matTooltip="Passt die Änderungsrate nach einem Sieg bzw. Niederlage an">
+        <mat-label>Anpassungsmodifikator für ELO</mat-label>
+        <input matInput type="number" min="0" [formControl]="eloAenControl" />
+      </mat-form-field>
+    </div>
+    <p class="info">Änderungen werden erst in der nächsten Runde aktiv!</p>
+  }
 </div>
+<button
+  matIconButton
+  class="collapse"
+  matTooltip="Eingabefelder ein-/ausklappen"
+  (click)="toggleCollapsed()"
+>
+  <mat-icon>
+    @if (collapsed) {
+      keyboard_arrow_right
+    } @else {
+      keyboard_arrow_down
+    }
+  </mat-icon>
+</button>

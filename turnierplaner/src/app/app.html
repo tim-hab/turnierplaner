@@ -6,7 +6,7 @@
   <div class="content-wrapper">
     <div class="header">
       <h1>Badminton JuxTurnier-App</h1>
-      <app-tournament-control></app-tournament-control>
+      <app-tournament-control (activeRoute)="activeRoute.set($event)"></app-tournament-control>
     </div>
     <app-control [activeRoute]="activeRoute()" />
   </div>

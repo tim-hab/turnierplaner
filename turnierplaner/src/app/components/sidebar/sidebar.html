@@ -1,11 +1,29 @@
 <div class="sidebar">
-  <button matIconButton class="icon" (click)="showSettings()">
+  <button
+    matIconButton
+    class="icon"
+    (click)="showSettings()"
+    matTooltip="Einstellungen"
+    matTooltipPosition="right"
+  >
     <mat-icon class="icon">settings</mat-icon>
   </button>
-  <button matIconButton class="icon" (click)="showFields()">
+  <button
+    matIconButton
+    class="icon"
+    (click)="showFields()"
+    matTooltip="Felder & Spiele"
+    matTooltipPosition="right"
+  >
     <mat-icon class="icon">sports_tennis</mat-icon>
   </button>
-  <button matIconButton class="icon" (click)="showTable()">
+  <button
+    matIconButton
+    class="icon"
+    (click)="showTable()"
+    matTooltip="Tabelle"
+    matTooltipPosition="right"
+  >
     <mat-icon class="icon">table_chart_outlined</mat-icon>
   </button>
 </div>

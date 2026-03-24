@@ -1,11 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardContent, MatCardActions } from '@angular/material/card';
 import { MatList, MatListItem } from '@angular/material/list';
-import { MatFormField, MatError } from '@angular/material/form-field';
+import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatAnchor } from '@angular/material/button';
-import { Match, TournamentService } from '../../services/tournament.service';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { TournamentService } from '../../services/tournament.service';
+import { Match } from '../../datatypes/Match';
 
 @Component({
   selector: 'app-field-view',
@@ -25,6 +25,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 })
 export class FieldView {
   tournamentService = inject(TournamentService);
+  round = Math.round;
 
   setWinner(match: Match, input: HTMLInputElement) {
     const score = input.value;
