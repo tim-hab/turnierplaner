@@ -12,4 +12,5 @@ import { PlayerService } from '../../services/player.service';
 })
 export class PlayerView {
   playerService = inject(PlayerService);
+  round = Math.round;
 }

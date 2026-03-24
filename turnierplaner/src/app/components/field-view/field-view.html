@@ -42,7 +42,13 @@
         </mat-card-content>
         <mat-card-actions>
           <mat-form-field>
-            <input matInput #input placeholder="21:15" />
+            <input
+              matInput
+              #input
+              placeholder="21:15"
+              [value]="match.score ? match.score.A + ':' + match.score.B : null"
+              [readonly]="match.completed"
+            />
           </mat-form-field>
           <button matButton="filled" [disabled]="match.completed" (click)="setWinner(match, input)">
             Ergebnisse übertragen

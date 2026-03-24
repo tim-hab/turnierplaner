@@ -46,6 +46,7 @@ export class PlayerService {
         losses: 0,
         frees: 0,
         played: 0,
+        points: 0,
       },
     ]);
   }
@@ -78,8 +79,11 @@ export class PlayerService {
     match.teamA.forEach((p) => {
       if (ergebnisA) {
         p.wins++;
+        p.points += 21;
       } else {
         p.losses++;
+        if (teamA >= 19) p.points += 19;
+        else p.points += teamA;
       }
       p.played++;
       p.elo += eloAenderungA;
@@ -88,8 +92,11 @@ export class PlayerService {
     match.teamB.forEach((p) => {
       if (ergebnisB) {
         p.wins++;
+        p.points += 21;
       } else {
         p.losses++;
+        if (teamB >= 19) p.points += 19;
+        else p.points += teamB;
       }
       p.played++;
       p.elo += eloAenderungB;

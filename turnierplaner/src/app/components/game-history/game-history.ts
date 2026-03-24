@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { MatAnchor } from '@angular/material/button';
 import { TournamentService } from '../../services/tournament.service';
 import { Player } from '../../datatypes/player';
 import { Match } from '../../datatypes/Match';
@@ -22,13 +21,13 @@ const TEST_DATA: Game[] = [
 
 @Component({
   selector: 'app-game-history',
-  imports: [MatTableModule, MatAnchor],
+  imports: [MatTableModule],
   templateUrl: './game-history.html',
   styleUrl: './game-history.css',
 })
 export class GameHistory {
   tournamentService = inject(TournamentService);
-  displayedColumns = ['round', 'field', 'teamA', 'teamB', 'score', 'action'];
+  displayedColumns = ['round', 'field', 'teamA', 'teamB', 'score' /*'action'*/];
   dataSource = TEST_DATA;
 
   changeScore(match: Match) {
