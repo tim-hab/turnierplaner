@@ -7,11 +7,16 @@ export interface Match {
   teamA: Team;
   teamB: Team;
   prob: { A: string; B: string };
-  score: null | { A: number; B: number };
+  score?: Score;
   completed: boolean;
 }
 
 export type Team = [Player, Player];
+
+export interface Score {
+  A: number;
+  B: number;
+}
 
 export function newMatch(id: number, round: number, field: number, teamA: Team, teamB: Team) {
   return {
@@ -21,7 +26,6 @@ export function newMatch(id: number, round: number, field: number, teamA: Team, 
     teamA: teamA,
     teamB: teamB,
     prob: calcProbability(teamA, teamB),
-    score: null,
     completed: false,
   } as Match;
 }
