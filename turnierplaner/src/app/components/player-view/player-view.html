@@ -1,12 +1,22 @@
 <div class="app-player-view-wrapper">
   <h2>Spieler</h2>
   <mat-list>
-    @for (player of playerService.player(); track player) {
-      <mat-list-item class="player-view-player"
-        >{{ player.name }} ({{ player.club }}) - ELO:{{ round(player.elo) }}
-        <!-- <button class="player-view-delete-button" matIconButton="filled" ()>
-          <mat-icon>delete_outline</mat-icon>
-        </button> -->
+    @for (player of playerService.player(); track player.id) {
+      <mat-list-item>
+        <div class="player-view-content">
+          <p>{{ player.name }} ({{ player.club }}) - ELO:{{ round(player.elo) }}</p>
+          <button
+            [class]="'player-view-delete-button ' + (player.active ? 'active' : 'inactive')"
+            matButton="filled"
+            (click)="playerService.toggleActivePlayer(player)"
+          >
+            @if (player.active) {
+              Aktiv
+            } @else {
+              Inaktiv
+            }
+          </button>
+        </div>
       </mat-list-item>
     }
   </mat-list>

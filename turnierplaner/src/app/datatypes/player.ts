@@ -8,6 +8,7 @@ export interface Player {
   frees: number;
   played: number;
   points: number;
+  active: boolean;
 }
 
 export function sortByFrees(a: Player, b: Player) {

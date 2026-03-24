@@ -1,10 +1,17 @@
-.player-view-delete-button {
-  visibility: hidden;
-  background-color: red;
+.player-view-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.player-view-player:hover .player-view-delete-button {
-  visibility: visible;
+.player-view-delete-button {
+  &.active {
+    background-color: green;
+  }
+
+  &.inactive {
+    background-color: orange;
+  }
 }
 
 .app-player-view-wrapper {
