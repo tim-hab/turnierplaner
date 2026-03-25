@@ -10,3 +10,9 @@
   align-items: center;
   align-self: center;
 }
+
+.info {
+  text-align: center;
+  font-size: x-large;
+  font-weight: bold;
+}

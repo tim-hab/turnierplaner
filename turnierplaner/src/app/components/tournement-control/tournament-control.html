@@ -12,18 +12,24 @@
     </div>
   }
   <div class="tournament-control-buttons">
-    <button matButton="filled" class="btn btn-success" (click)="startTournament()">
-      ▶️ Turnier starten
-    </button>
-    <button matButton="filled" class="btn btn-warning" (click)="nextRound()">
-      🔄 Nächste Runde
-    </button>
-    <button matButton="filled" class="btn btn-danger" (click)="endTournament()">
-      ⏹️ Turnier beenden
-    </button>
-    <button matButton="filled" class="btn btn-secondary" (click)="exportCSV()">
-      📥 Export CSV
-    </button>
+    @if (tournamentService.round() === 0) {
+      <button matButton="filled" class="btn btn-success" (click)="startTournament()">
+        ▶️ Turnier starten
+      </button>
+    } @else {
+      <button matButton="filled" class="btn btn-warning" (click)="nextRound()">
+        🔄 Nächste Runde
+      </button>
+
+      <button matButton="filled" class="btn btn-danger" (click)="endTournament()">
+        ⏹️ Turnier beenden
+      </button>
+    }
+    @if (playerService.player().length === 0) {
+      <app-file-input></app-file-input>
+    } @else {
+      <app-file-export></app-file-export>
+    }
   </div>
   <div class="tournament-control-slider">
     <mat-slide-toggle class="form-check-input" type="slider" id="showProb" (click)="toggleProb()" />

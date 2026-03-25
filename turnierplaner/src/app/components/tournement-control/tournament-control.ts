@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, effect, inject, output } from '@angular/core';
 import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { Algorithm } from '../../datatypes/Match';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+import { FileInput } from '../../custom-components/file-input/file-input';
+import { FileExport } from '../../custom-components/file-export/file-export';
+import { PlayerService } from '../../services/player.service';
 
 @Component({
   selector: 'app-tournament-control',
@@ -23,12 +26,15 @@ import { MatIcon } from '@angular/material/icon';
     MatSelectModule,
     MatTooltipModule,
     MatIcon,
+    FileInput,
+    FileExport,
   ],
   templateUrl: './tournament-control.html',
   styleUrl: './tournament-control.css',
 })
 export class TournamentControl {
-  private tournamentService = inject(TournamentService);
+  tournamentService = inject(TournamentService);
+  playerService = inject(PlayerService);
 
   fieldsControl = new FormControl<number>(4, Validators.required);
   roundControl = new FormControl<number>(5, Validators.required);
@@ -41,6 +47,13 @@ export class TournamentControl {
   Algorithm = Algorithm;
   matchMaking = false;
   collapsed = false;
+
+  constructor() {
+    effect(() => {
+      this.roundControl.setValue(this.tournamentService.totalRounds(), { emitEvent: false });
+      console.log('update');
+    });
+  }
 
   startTournament() {
     if (this.fieldsControl.valid && this.roundControl.valid) {
@@ -64,16 +77,12 @@ export class TournamentControl {
     }
   }
 
-  exportCSV() {
-    /* empty */
-  }
-
   endTournament() {
     /* empty */
   }
 
   nextRound() {
-    if (this.fieldsControl.valid) {
+    if (this.fieldsControl.valid && this.roundControl.valid) {
       this.activeRoute.emit(Route.FieldView);
       if (
         this.matchMaking &&
@@ -83,12 +92,13 @@ export class TournamentControl {
       ) {
         this.tournamentService.nextRound(
           this.roundControl.value!,
+          this.fieldsControl.value!,
           this.eloModControl.value!,
           this.algorithmControl.value!,
           this.eloAenControl.value!,
         );
       } else {
-        this.tournamentService.nextRound(this.fieldsControl.value!);
+        this.tournamentService.nextRound(this.roundControl.value!, this.fieldsControl.value!);
       }
     }
   }

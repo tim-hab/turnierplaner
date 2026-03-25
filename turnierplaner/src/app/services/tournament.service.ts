@@ -9,11 +9,11 @@ import { Algorithm, Match, newMatch, Team } from '../datatypes/Match';
 export class TournamentService {
   private newID = 0;
   private playerService = inject(PlayerService);
-  private totalRounds = 5;
   private fields = 4;
   private Kbasis = 32;
 
-  round = linkedSignal<number>(() => 1);
+  totalRounds = linkedSignal<number>(() => 5);
+  round = linkedSignal<number>(() => 0);
   matches = linkedSignal<Match[]>(() => []);
   freePlayers = linkedSignal<Player[]>(() => []);
   history = linkedSignal<Match[]>(() => []);
@@ -28,12 +28,20 @@ export class TournamentService {
   ) {
     if (this.playerService.player().length < 4) return alert('Mindestens 4 Spieler!');
     this.fields = fields;
-    this.totalRounds = totalRounds;
+    this.totalRounds.update(() => totalRounds);
+    this.round.set(1);
     this.generateMatches(eloMod, algorithm, Kbasis);
   }
 
-  nextRound(fields: number, eloMod?: number, algorithm?: Algorithm, Kbasis?: number) {
-    if (this.round() >= this.totalRounds) {
+  nextRound(
+    round: number,
+    fields: number,
+    eloMod?: number,
+    algorithm?: Algorithm,
+    Kbasis?: number,
+  ) {
+    this.totalRounds.update(() => round);
+    if (this.round() >= this.totalRounds()) {
       alert('Maximale Runden erreicht');
       return;
     }

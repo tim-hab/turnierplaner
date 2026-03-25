@@ -2,37 +2,13 @@ import { Injectable, linkedSignal } from '@angular/core';
 import { Player } from '../datatypes/player';
 import { Match } from '../datatypes/Match';
 
-const mockPlayer = [
-  'Armin',
-  'Tim',
-  'TEssa',
-  'Jan',
-  'Jana',
-  'Martin',
-  'Felix',
-  'Tom',
-  'Sonja',
-  'Emily',
-  'Celine',
-  'Tobias',
-  'Andreas',
-];
-
-const mockClubs = ['SuS Westenholz', 'Boke'];
-
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerService {
   private newID = 0;
   player = linkedSignal<Player[]>(() => []);
-  clubs = linkedSignal<string[]>(() => mockClubs);
-
-  constructor() {
-    for (const player of mockPlayer) {
-      this.addNewPlayer(player, 'SuS', Math.random() * 100 + 500);
-    }
-  }
+  clubs = linkedSignal<string[]>(() => []);
 
   addNewPlayer(name: string, club: string, elo: number) {
     this.player.update((l) => [

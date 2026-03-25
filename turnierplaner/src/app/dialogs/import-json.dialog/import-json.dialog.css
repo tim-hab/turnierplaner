@@ -1,0 +1,17 @@
+.content-wrapper {
+  padding: 15px;
+
+  .info {
+    text-align: center;
+  }
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+
+  button {
+    margin: 5px;
+  }
+}
