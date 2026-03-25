@@ -5,8 +5,12 @@
       <app-player-view></app-player-view>
     }
     @case (Route.FieldView) {
-      <app-field-view></app-field-view>
-      <app-game-history></app-game-history>
+      @if (tournamentService.round() === 0) {
+        <p class="info">Noch nichts zu sehen. Bitte starte ein Turnier.</p>
+      } @else {
+        <app-field-view></app-field-view>
+        <app-game-history></app-game-history>
+      }
     }
     @case (Route.TableView) {
       <app-live-table></app-live-table>
