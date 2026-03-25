@@ -21,10 +21,14 @@ label {
 .fields {
   display: inline-flex;
   flex-wrap: wrap;
-  max-width: 50vw;
+  width: 100%;
   justify-content: space-evenly;
 }
 
-.custom-score-input {
-  width: 100px;
+.team-label {
+  font-weight: bold;
+}
+
+button {
+  margin-left: 5px;
 }

@@ -1,0 +1,12 @@
+.custom-score-input {
+  width: 100px;
+}
+
+.mat-error {
+  text-wrap-mode: wrap;
+  width: 250px;
+  background-color: lightgray;
+  border-radius: 10px;
+  padding: 5px;
+  margin-top: 5px;
+}

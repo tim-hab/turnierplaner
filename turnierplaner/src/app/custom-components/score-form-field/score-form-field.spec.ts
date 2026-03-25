@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ScoreInput } from './score-input';
+import { ScoreFormField } from './score-form-field';
 
-describe('ScoreInput', () => {
-  let component: ScoreInput;
-  let fixture: ComponentFixture<ScoreInput>;
+describe('ScoreFormField', () => {
+  let component: ScoreFormField;
+  let fixture: ComponentFixture<ScoreFormField>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScoreInput],
+      imports: [ScoreFormField],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ScoreInput);
+    fixture = TestBed.createComponent(ScoreFormField);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
