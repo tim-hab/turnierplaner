@@ -1,0 +1,6 @@
+<mat-form-field class="custom-score-input">
+  <custom-score-input [formControl]="control()" [readonly]="readonly()" #input />
+  @if (input.score.errors) {
+    <mat-error class="mat-error">{{ input.score.errors['error'] }}</mat-error>
+  }
+</mat-form-field>

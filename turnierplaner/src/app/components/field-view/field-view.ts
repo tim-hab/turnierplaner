@@ -1,11 +1,10 @@
 import { Component, effect, inject } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardContent, MatCardActions } from '@angular/material/card';
 import { MatList, MatListItem } from '@angular/material/list';
-import { MatFormField } from '@angular/material/form-field';
 import { MatAnchor } from '@angular/material/button';
 import { TournamentService } from '../../services/tournament.service';
 import { Match } from '../../datatypes/Match';
-import { CustomScoreInput, Score } from './score-input/score-input';
+import { Score } from '../../custom-components/score-form-field/score-input/score-input';
 import {
   FormArray,
   FormBuilder,
@@ -13,6 +12,7 @@ import {
   ɵInternalFormsSharedModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { ScoreFormField } from '../../custom-components/score-form-field/score-form-field';
 
 @Component({
   selector: 'app-field-view',
@@ -23,11 +23,10 @@ import {
     MatList,
     MatListItem,
     MatCardActions,
-    MatFormField,
     MatAnchor,
     ɵInternalFormsSharedModule,
     ReactiveFormsModule,
-    CustomScoreInput,
+    ScoreFormField,
   ],
   templateUrl: './field-view.html',
   styleUrl: './field-view.css',
@@ -54,23 +53,12 @@ export class FieldView {
     });
   }
 
-  setWinner(match: Match, input: CustomScoreInput) {
-    const score = input.value;
-    const values = [Number(score?.teamA), Number(score?.teamB)] as number[];
-    if (values[0] < 21 && values[1] < 21)
-      alert(
-        'Das Spiel ist erst dann zu Ende, wenn ein Team 21 oder mehr Punkte und das andere Team min. 2 Punkte weniger hat.',
-      );
-    else if (values[0] == values[1]) alert('Punkte müssen unterschiedlich sein');
-    else if (
-      (values[0] > 21 || values[1] > 21) &&
-      (Math.abs(values[0] - values[1]) < 2 || Math.abs(values[0] - values[1]) > 2)
-    )
-      alert('Wenn eine Punktzahl über 21 ist, muss die andere 2 Punkte niedriger sein');
-    else if (values[0] > 19 && values[1] > 19 && (values[0] == 21 || values[1] == 21))
-      alert(
-        'Wenn das Gewinner Team 21 Punkte hat, darf das Verlierer Team maximal 19 Punkte haben, bzw. muss solange weitergespielt werden, bis der Punktestand um 2 Punkte auseinanderliegt',
-      );
-    else this.tournamentService.setWinner(match, values[0], values[1]);
+  setWinner(match: Match, index: number) {
+    const control = this.matches.controls[index];
+    if (control.valid) {
+      const score = control.value;
+      const values = [Number(score?.teamA), Number(score?.teamB)] as number[];
+      this.tournamentService.setWinner(match, values[0], values[1]);
+    }
   }
 }

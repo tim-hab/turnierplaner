@@ -30,6 +30,7 @@ import {
 } from '@angular/forms';
 import { MatFormFieldControl, MAT_FORM_FIELD } from '@angular/material/form-field';
 import { Subject } from 'rxjs';
+import { createScoreValidator } from '../score-input-validator';
 
 export class Score {
   constructor(
@@ -38,7 +39,12 @@ export class Score {
   ) {}
 }
 
-/** Custom `MatFormFieldControl` for telephone number input. */
+export type ScoreControl = FormGroup<{
+  teamA: FormControl<string | null>;
+  teamB: FormControl<string | null>;
+}>;
+
+/** Custom `MatFormFieldControl` for score number input. */
 @Component({
   selector: 'custom-score-input',
   templateUrl: 'score-input.html',
@@ -58,14 +64,11 @@ export class CustomScoreInput
   readonly teamAInput = viewChild.required<HTMLInputElement>('teamA');
   readonly teamBInput = viewChild.required<HTMLInputElement>('teamB');
   ngControl = inject(NgControl, { optional: true, self: true });
-  readonly score: FormGroup<{
-    teamA: FormControl<string | null>;
-    teamB: FormControl<string | null>;
-  }>;
+  readonly score: ScoreControl;
   readonly stateChanges = new Subject<void>();
   readonly touched = signal(false);
-  readonly controlType = 'example-tel-input';
-  readonly id = `example-tel-input-${CustomScoreInput.nextId++}`;
+  readonly controlType = 'custom-score-input';
+  readonly id = `custom-score-input-${CustomScoreInput.nextId++}`;
   readonly _userAriaDescribedBy = input<string>('', { alias: 'aria-describedby' });
   readonly _placeholder = input<string>('', { alias: 'placeholder' });
   readonly _required = input<boolean, unknown>(false, {
@@ -143,26 +146,31 @@ export class CustomScoreInput
       this.ngControl.valueAccessor = this;
     }
 
-    this.score = inject(FormBuilder).group({
-      teamA: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(2),
-          Validators.pattern(/\d+/),
+    this.score = inject(FormBuilder).group(
+      {
+        teamA: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(2),
+            Validators.maxLength(2),
+            Validators.pattern(/\d+/),
+          ],
         ],
-      ],
-      teamB: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(2),
-          Validators.pattern(/\d+/),
+        teamB: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(2),
+            Validators.maxLength(2),
+            Validators.pattern(/\d+/),
+          ],
         ],
-      ],
-    });
+      },
+      {
+        validators: [createScoreValidator()],
+      },
+    );
 
     effect(() => {
       // Read signals to trigger effect.
@@ -190,14 +198,6 @@ export class CustomScoreInput
     this.score.statusChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.stateChanges.next();
     });
-
-    // this.score.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
-    //   const tel = this.score.valid
-    //     ? new Score(this.score.value.teamA || '', this.score.value.teamB || '')
-    //     : null;
-    //   this._updateValue(tel);
-    //   console.log('Tel', tel);
-    // });
   }
 
   ngOnDestroy() {
@@ -206,7 +206,7 @@ export class CustomScoreInput
   }
 
   onFocusIn() {
-    if (!this._focused()) {
+    if (!this._readonly() && !this._focused()) {
       this._focused.set(true);
     }
   }

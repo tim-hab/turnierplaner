@@ -1,74 +1,70 @@
-<h2>Aktuelle Runde</h2>
+<h2>Aktuelle Runde (Runde {{ tournamentService.round() }})</h2>
 <div class="field-view-wrapper">
-  <div class="fields">
-    <div [formArray]="matches">
-      @for (match of tournamentService.matches(); track match.id) {
-        <mat-card class="field">
-          <mat-card-header>Feld {{ match.field }}</mat-card-header>
-          <mat-card-content class="teams">
-            <mat-list [id]="'teamA' + match.id">
-              <label [for]="'teamA' + match.id">Team A</label>
-              @if (tournamentService.showProb()) {
-                <p>
-                  <em>{{ match.prob.A }}%</em>
-                </p>
-                <mat-list-item
-                  >{{ match.teamA[0].name }} ({{ round(match.teamA[0].elo) }})</mat-list-item
-                >
-                <mat-list-item
-                  >{{ match.teamA[1].name }} ({{ round(match.teamA[1].elo) }})</mat-list-item
-                >
-              } @else {
-                <mat-list-item>{{ match.teamA[0].name }}</mat-list-item>
-                <mat-list-item>{{ match.teamA[1].name }}</mat-list-item>
-              }
-            </mat-list>
-            <mat-list [id]="'teamB' + match.id">
-              <label [for]="'teamB' + match.id">Team B</label>
-              @if (tournamentService.showProb()) {
-                <p>
-                  <em>{{ match.prob.B }}%</em>
-                </p>
-                <mat-list-item
-                  >{{ match.teamB[0].name }} ({{ round(match.teamB[0].elo) }})</mat-list-item
-                >
-                <mat-list-item
-                  >{{ match.teamB[1].name }} ({{ round(match.teamB[1].elo) }})</mat-list-item
-                >
-              } @else {
-                <mat-list-item>{{ match.teamB[0].name }}</mat-list-item>
-                <mat-list-item>{{ match.teamB[1].name }}</mat-list-item>
-              }
-            </mat-list>
-          </mat-card-content>
-          <mat-card-actions>
-            <mat-form-field class="custom-score-input">
-              <custom-score-input
-                [formControlName]="$index"
-                [readonly]="match.completed"
-                [value]="
-                  match.score
-                    ? { teamA: match.score.A.toString(), teamB: match.score.B.toString() }
-                    : null
-                "
-                #input
-              />
-            </mat-form-field>
-            <button
-              matButton="filled"
-              [disabled]="match.completed"
-              (click)="setWinner(match, input)"
-            >
-              Ergebnisse übertragen
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      }
-    </div>
+  <div [formArray]="matches" class="fields">
+    @for (match of tournamentService.matches(); track match.id) {
+      <mat-card class="field">
+        <mat-card-header>Feld {{ match.field }}</mat-card-header>
+        <mat-card-content class="teams">
+          <mat-list [id]="'teamA' + match.id">
+            <label class="team-label" [for]="'teamA' + match.id">Team A</label>
+            @if (tournamentService.showProb()) {
+              <p>
+                <em>{{ match.prob.A }}%</em>
+              </p>
+              <mat-list-item
+                >{{ match.teamA[0].name }} ({{ round(match.teamA[0].elo) }})</mat-list-item
+              >
+              <mat-list-item
+                >{{ match.teamA[1].name }} ({{ round(match.teamA[1].elo) }})</mat-list-item
+              >
+            } @else {
+              <mat-list-item>{{ match.teamA[0].name }}</mat-list-item>
+              <mat-list-item>{{ match.teamA[1].name }}</mat-list-item>
+            }
+          </mat-list>
+          <hr />
+          <mat-list [id]="'teamB' + match.id">
+            <label class="team-label" [for]="'teamB' + match.id">Team B</label>
+            @if (tournamentService.showProb()) {
+              <p>
+                <em>{{ match.prob.B }}%</em>
+              </p>
+              <mat-list-item
+                >{{ match.teamB[0].name }} ({{ round(match.teamB[0].elo) }})</mat-list-item
+              >
+              <mat-list-item
+                >{{ match.teamB[1].name }} ({{ round(match.teamB[1].elo) }})</mat-list-item
+              >
+            } @else {
+              <mat-list-item>{{ match.teamB[0].name }}</mat-list-item>
+              <mat-list-item>{{ match.teamB[1].name }}</mat-list-item>
+            }
+          </mat-list>
+        </mat-card-content>
+        <mat-card-actions>
+          <app-score-form-field
+            [control]="matches.controls[$index]"
+            [score]="
+              match.score
+                ? { teamA: match.score.A.toString(), teamB: match.score.B.toString() }
+                : null
+            "
+            [readonly]="match.completed"
+          ></app-score-form-field>
+          <button
+            matButton="filled"
+            [disabled]="match.completed"
+            (click)="setWinner(match, $index)"
+          >
+            Ergebnisse übertragen
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
   </div>
   @if (tournamentService.freePlayers().length > 0) {
     <mat-card class="field">
-      <mat-card-header>Freilos Spieler Runde {{ tournamentService.round() }}</mat-card-header>
+      <mat-card-header>Freilos Spieler</mat-card-header>
       <mat-card-content class="teams">
         <mat-list>
           @for (player of tournamentService.freePlayers(); track player.id) {
