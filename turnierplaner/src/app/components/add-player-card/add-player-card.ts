@@ -29,7 +29,7 @@ export class AddPlayerCard {
 
   playerService = inject(PlayerService);
 
-  addPlayer(event: PointerEvent) {
+  addPlayer(event: Event) {
     event.preventDefault();
     this.form.markAllAsTouched();
     if (this.form.valid) {
@@ -38,6 +38,10 @@ export class AddPlayerCard {
         this.form.value.clubControl!,
         this.form.value.eloControl!,
       );
+      this.form.reset({
+        clubControl: this.form.value.clubControl,
+        eloControl: 500,
+      });
     }
   }
 

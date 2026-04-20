@@ -50,6 +50,7 @@
                 : null
             "
             [readonly]="match.completed"
+            (enter)="setWinner(match, $index, $event)"
           ></app-score-form-field>
           <button
             matButton="filled"

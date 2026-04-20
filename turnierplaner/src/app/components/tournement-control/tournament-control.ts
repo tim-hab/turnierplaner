@@ -51,7 +51,6 @@ export class TournamentControl {
   constructor() {
     effect(() => {
       this.roundControl.setValue(this.tournamentService.totalRounds(), { emitEvent: false });
-      console.log('update');
     });
   }
 

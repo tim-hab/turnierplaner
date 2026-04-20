@@ -4,7 +4,7 @@
       <mat-card-header>Spieler hinzufügen/ Nachrücker</mat-card-header>
       <mat-card-content class="add-player-card-content">
         <mat-form-field appearance="outline">
-          <input matInput placeholder="Name" [formControlName]="'nameControl'" />
+          <input matInput placeholder="Name" [formControlName]="'nameControl'" (keyup.enter)="addPlayer($event)"/>
           <mat-error>Feld darf nicht leer sein!</mat-error>
         </mat-form-field>
         <mat-form-field>
