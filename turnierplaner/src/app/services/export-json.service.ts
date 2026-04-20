@@ -102,6 +102,13 @@ export class ExportJsonService {
 
   importPlayerData(input: string) {
     const content: Content = JSON.parse(input);
+    content.player.forEach((p) => {
+      p.frees = 0;
+      p.losses = 0;
+      p.wins = 0;
+      p.played = 0;
+      p.points = 0;
+    });
     this.playerService.player.set(content.player);
     this.playerService.clubs.set(content.clubs);
     this.tournamentService.matches.set([]);
