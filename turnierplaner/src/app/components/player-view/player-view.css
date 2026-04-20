@@ -26,16 +26,22 @@
   border: none;
   padding: 5px;
   margin: 5px;
-  font: inherit; 
+  font: inherit;
   color: inherit;
   cursor: pointer;
   text-align: left;
 }
 
-.text-button:hover, .text-button:focus {
+.text-button:hover,
+.text-button:focus {
   outline: 2px solid blue;
 }
 
 .name-input {
   margin: 5;
+}
+
+.player-list {
+  columns: 4;
+  width: 100%;
 }

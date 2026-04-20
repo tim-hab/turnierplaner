@@ -1,43 +1,42 @@
 <div class="app-player-view-wrapper">
   <h2>Spieler ({{ playerService.player().length }})</h2>
-  <mat-list>
-    @for (player of playerService.player(); track player.id) {
-      <mat-list-item>
-        <div class="player-view-content">
-          @if (editingId !== player.id) {
-            <button matButton (click)="editName(player.id)" class="text-button">
-              {{ player.name }} ({{ player.club }}) - ELO:{{ round(player.elo) }}
-            </button>
-          }
 
-          @if (editingId === player.id) {
-            <mat-form-field appearance="outline" class="name-input">
-              <input
-                [id]="'name-input-' + player.id"
-                matInput
-                type="text"
-                [value]="player.name"
-                (blur)="saveName()"
-                (keyup.enter)="saveName()"
-                (input)="updateName(player, $event.target)"
-                appSelectOnFocusDirective
-              />
-            </mat-form-field>
-          }
-
-          <button
-            [class]="'player-view-delete-button ' + (player.active ? 'active' : 'inactive')"
-            matButton="filled"
-            (click)="playerService.toggleActivePlayer(player)"
-          >
-            @if (player.active) {
-              Aktiv
-            } @else {
-              Inaktiv
-            }
+  <div class="player-list">
+    @for (player of [...playerService.player()].sort(sortByName); track player.id) {
+      <div class="player-view-content">
+        @if (editingId !== player.id) {
+          <button matButton (click)="editName(player.id)" class="text-button">
+            {{ player.name }} ({{ player.club }})
           </button>
-        </div>
-      </mat-list-item>
+        }
+
+        @if (editingId === player.id) {
+          <mat-form-field appearance="outline" class="name-input">
+            <input
+              [id]="'name-input-' + player.id"
+              matInput
+              type="text"
+              [value]="player.name"
+              (blur)="saveName()"
+              (keyup.enter)="saveName()"
+              (input)="updateName(player, $event.target)"
+              appSelectOnFocusDirective
+            />
+          </mat-form-field>
+        }
+
+        <button
+          [class]="'player-view-delete-button ' + (player.active ? 'active' : 'inactive')"
+          matButton="filled"
+          (click)="playerService.toggleActivePlayer(player)"
+        >
+          @if (player.active) {
+            Aktiv
+          } @else {
+            Inaktiv
+          }
+        </button>
+      </div>
     }
-  </mat-list>
+  </div>
 </div>

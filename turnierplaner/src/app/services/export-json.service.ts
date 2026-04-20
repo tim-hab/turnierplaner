@@ -56,6 +56,7 @@ export class ExportJsonService {
     this.tournamentService.history.set(content.history);
     this.tournamentService.round.set(content.round);
     this.tournamentService.totalRounds.set(content.totalRounds);
+    this.tournamentService['newID'] = this.tournamentService.matches().length;
   }
 
   /* eslint-disable @typescript-eslint/prefer-for-of */
