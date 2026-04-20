@@ -53,7 +53,8 @@ export class FieldView {
     });
   }
 
-  setWinner(match: Match, index: number) {
+  setWinner(match: Match, index: number, event?: Event) {
+    if (event) event.preventDefault();
     const control = this.matches.controls[index];
     if (control.valid) {
       const score = control.value;

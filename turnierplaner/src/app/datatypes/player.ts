@@ -11,6 +11,16 @@ export interface Player {
   active: boolean;
 }
 
+export function sortByName(a: Player, b: Player) {
+  if (a.name < b.name) {
+    return -1;
+  } else if (a.name == b.name) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
 export function sortByFrees(a: Player, b: Player) {
   const first = b.frees - a.frees;
   return first;

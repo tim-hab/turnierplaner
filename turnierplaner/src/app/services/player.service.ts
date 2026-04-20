@@ -11,6 +11,12 @@ export class PlayerService {
   clubs = linkedSignal<string[]>(() => []);
 
   addNewPlayer(name: string, club: string, elo: number) {
+    if (this.player().find((p) => p.id == this.newID)) {
+      this.newID = this.player.length;
+      while (this.player().find((p) => p.id == this.newID)) {
+        this.newID++;
+      }
+    }
     this.player.update((l) => [
       ...l,
       {

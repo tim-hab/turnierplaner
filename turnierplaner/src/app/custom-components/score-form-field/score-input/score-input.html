@@ -26,6 +26,7 @@
     aria-label="Points Team B"
     (input)="_handleInput(score.controls.teamB)"
     (keyup.backspace)="autoFocusPrev(score.controls.teamB, teamA)"
+    (keyup.enter)="enter.emit($event)"
     inputmode="numeric"
     [readOnly]="_readonly()"
     #teamB

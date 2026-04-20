@@ -1,4 +1,4 @@
-import { Component, effect, input, viewChild } from '@angular/core';
+import { Component, effect, input, output, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CustomScoreInput, Score } from './score-input/score-input';
@@ -14,6 +14,7 @@ export class ScoreFormField {
   readonly control = input.required<FormControl<Score | null>>();
   readonly readonly = input<boolean>(false);
   readonly inputElement = viewChild.required<CustomScoreInput>('input');
+  enter = output<Event>();
 
   constructor() {
     effect(() => {

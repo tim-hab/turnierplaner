@@ -15,6 +15,7 @@ import {
   ElementRef,
   effect,
   untracked,
+  output,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -96,6 +97,7 @@ export class CustomScoreInput
     optional: true,
   });
 
+  enter = output<Event>();
   private readonly _focused = signal(false);
   private readonly _disabledByCva = signal(false);
   private readonly _disabled = computed(() => this._disabledByInput() || this._disabledByCva());
