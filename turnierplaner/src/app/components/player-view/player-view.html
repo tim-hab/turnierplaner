@@ -1,10 +1,30 @@
 <div class="app-player-view-wrapper">
-  <h2>Spieler</h2>
+  <h2>Spieler ({{ playerService.player().length }})</h2>
   <mat-list>
     @for (player of playerService.player(); track player.id) {
       <mat-list-item>
         <div class="player-view-content">
-          <p>{{ player.name }} ({{ player.club }}) - ELO:{{ round(player.elo) }}</p>
+          @if (editingId !== player.id) {
+            <button matButton (click)="editName(player.id)" class="text-button">
+              {{ player.name }} ({{ player.club }}) - ELO:{{ round(player.elo) }}
+            </button>
+          }
+
+          @if (editingId === player.id) {
+            <mat-form-field appearance="outline" class="name-input">
+              <input
+                [id]="'name-input-' + player.id"
+                matInput
+                type="text"
+                [value]="player.name"
+                (blur)="saveName()"
+                (keyup.enter)="saveName()"
+                (input)="updateName(player, $event.target)"
+                appSelectOnFocusDirective
+              />
+            </mat-form-field>
+          }
+
           <button
             [class]="'player-view-delete-button ' + (player.active ? 'active' : 'inactive')"
             matButton="filled"
