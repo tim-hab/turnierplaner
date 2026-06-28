@@ -12,6 +12,7 @@ interface Content {
   history: Match[];
   round: number;
   totalRounds: number;
+  running: boolean;
 }
 
 @Injectable({
@@ -33,6 +34,7 @@ export class ExportJsonService {
     const history = this.tournamentService.history();
     const round = this.tournamentService.round();
     const totalRounds = this.tournamentService.totalRounds();
+    const running = this.tournamentService.running();
 
     const content = {
       player: player,
@@ -41,6 +43,7 @@ export class ExportJsonService {
       history: history,
       round: round,
       totalRounds: totalRounds,
+      running: running,
     };
 
     return URL.createObjectURL(
@@ -56,6 +59,7 @@ export class ExportJsonService {
     this.tournamentService.history.set(content.history);
     this.tournamentService.round.set(content.round);
     this.tournamentService.totalRounds.set(content.totalRounds);
+    this.tournamentService.running.set(content.running);
     this.tournamentService['newID'] = this.tournamentService.matches().length;
   }
 
