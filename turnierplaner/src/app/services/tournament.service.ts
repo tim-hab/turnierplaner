@@ -18,6 +18,7 @@ export class TournamentService {
   freePlayers = linkedSignal<Player[]>(() => []);
   history = linkedSignal<Match[]>(() => []);
   showProb = linkedSignal<boolean>(() => false);
+  running = linkedSignal<boolean>(() => true);
 
   startTournament(
     totalRounds: number,
@@ -137,5 +138,13 @@ export class TournamentService {
 
   toggleProb() {
     this.showProb.update((prob) => !prob);
+  }
+
+  endTournament() {
+    this.running.set(false);
+    this.playerService.player().forEach((player) => {
+      const averageScorePerMatch = Math.round(player.points / player.played);
+      player.points += averageScorePerMatch * player.frees;
+    });
   }
 }

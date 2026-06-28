@@ -12,6 +12,7 @@ interface Content {
   history: Match[];
   round: number;
   totalRounds: number;
+  running: boolean;
 }
 
 @Injectable({
@@ -26,25 +27,31 @@ export class ExportJsonService {
   //   this.importPlayerData(JSON.stringify(devPlayers));
   // }
 
-  generateJsonFile() {
+  generateJsonString(): string {
     const player = this.playerService.player();
     const clubs = this.playerService.clubs();
     const matches = this.tournamentService.matches();
     const history = this.tournamentService.history();
     const round = this.tournamentService.round();
     const totalRounds = this.tournamentService.totalRounds();
+    const running = this.tournamentService.running();
 
-    const content = {
+    return JSON.stringify({
       player: player,
       clubs: clubs,
       matches: matches,
       history: history,
       round: round,
       totalRounds: totalRounds,
-    };
+      running: running,
+    });
+  }
 
+  generateJsonFile() {
     return URL.createObjectURL(
-      new File([JSON.stringify(content)], 'turnier.json', { type: 'application/json' }),
+      new File([this.generateJsonString()], 'turnier.json', {
+        type: 'application/json',
+      }),
     );
   }
 
@@ -56,6 +63,7 @@ export class ExportJsonService {
     this.tournamentService.history.set(content.history);
     this.tournamentService.round.set(content.round);
     this.tournamentService.totalRounds.set(content.totalRounds);
+    this.tournamentService.running.set(content.running == null ? true : content.running);
     this.tournamentService['newID'] = this.tournamentService.matches().length;
   }
 
@@ -116,5 +124,6 @@ export class ExportJsonService {
     this.tournamentService.history.set([]);
     this.tournamentService.round.set(0);
     this.tournamentService.totalRounds.set(content.totalRounds);
+    this.tournamentService.running.set(true);
   }
 }

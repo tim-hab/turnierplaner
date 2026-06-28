@@ -13,6 +13,7 @@ import { MatIcon } from '@angular/material/icon';
 import { FileInput } from '../../custom-components/file-input/file-input';
 import { FileExport } from '../../custom-components/file-export/file-export';
 import { PlayerService } from '../../services/player.service';
+import { ExportJsonService } from '../../services/export-json.service';
 
 @Component({
   selector: 'app-tournament-control',
@@ -35,6 +36,7 @@ import { PlayerService } from '../../services/player.service';
 export class TournamentControl {
   tournamentService = inject(TournamentService);
   playerService = inject(PlayerService);
+  exportService = inject(ExportJsonService);
 
   fieldsControl = new FormControl<number>(4, Validators.required);
   roundControl = new FormControl<number>(5, Validators.required);
@@ -77,7 +79,13 @@ export class TournamentControl {
   }
 
   endTournament() {
-    /* empty */
+    this.tournamentService.endTournament();
+    this.activeRoute.emit(Route.TableView);
+  }
+
+  newTournament() {
+    this.exportService.importPlayerData(this.exportService.generateJsonString());
+    this.activeRoute.emit(Route.Settings);
   }
 
   nextRound() {

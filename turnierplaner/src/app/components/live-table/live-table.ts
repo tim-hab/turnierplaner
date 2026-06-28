@@ -4,6 +4,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { PlayerService } from '../../services/player.service';
 import { sortByPointsThenWins } from '../../datatypes/player';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { TournamentService } from '../../services/tournament.service';
 
 @Component({
   selector: 'app-live-table',
@@ -14,6 +15,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 export class LiveTable implements AfterViewInit {
   displayedColumns = ['player', 'club', 'elo', 'points', 'wins', 'losses', 'frees', 'played'];
   playerService = inject(PlayerService);
+  tournamentService = inject(TournamentService);
   round = Math.round;
 
   dataSource = new MatTableDataSource([...this.playerService.player()].sort(sortByPointsThenWins));
