@@ -16,7 +16,7 @@
       <button matButton="filled" class="btn btn-success" (click)="startTournament()">
         ▶️ Turnier starten
       </button>
-    } @else if (tournamentService.running()) {
+    } @else if (!tournamentService.running()) {
       <button matButton="filled" class="btn btn-warning" (click)="newTournament()">
         🔄 Neues Turnier
       </button>

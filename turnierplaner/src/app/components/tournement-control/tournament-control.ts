@@ -85,6 +85,7 @@ export class TournamentControl {
 
   newTournament() {
     this.exportService.importPlayerData(this.exportService.generateJsonString());
+    this.activeRoute.emit(Route.Settings);
   }
 
   nextRound() {

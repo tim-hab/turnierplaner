@@ -143,7 +143,7 @@ export class TournamentService {
   endTournament() {
     this.running.set(false);
     this.playerService.player().forEach((player) => {
-      const averageScorePerMatch = player.points / player.played;
+      const averageScorePerMatch = Math.round(player.points / player.played);
       player.points += averageScorePerMatch * player.frees;
     });
   }
