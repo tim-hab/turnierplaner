@@ -1,4 +1,4 @@
-import { Injectable, linkedSignal } from '@angular/core';
+import { computed, Injectable, linkedSignal } from '@angular/core';
 import { Player } from '../datatypes/player';
 import { Match } from '../datatypes/Match';
 
@@ -9,6 +9,13 @@ export class PlayerService {
   private newID = 0;
   player = linkedSignal<Player[]>(() => []);
   clubs = linkedSignal<string[]>(() => []);
+  activePlayerCount = computed(() => {
+    let count = 0;
+    this.player().forEach((player) => {
+      if (player.active) count++;
+    });
+    return count;
+  });
 
   addNewPlayer(name: string, club: string, elo: number) {
     if (this.player().find((p) => p.id == this.newID)) {

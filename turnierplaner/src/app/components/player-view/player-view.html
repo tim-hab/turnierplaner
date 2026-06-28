@@ -1,5 +1,7 @@
 <div class="app-player-view-wrapper">
-  <h2>Spieler ({{ playerService.player().length }})</h2>
+  <h2>
+    Spieler ({{ playerService.player().length }} / aktiv {{ playerService.activePlayerCount() }})
+  </h2>
 
   <div class="player-list">
     @for (player of [...playerService.player()].sort(sortByName); track player.id) {
