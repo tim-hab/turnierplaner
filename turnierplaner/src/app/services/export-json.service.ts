@@ -27,7 +27,7 @@ export class ExportJsonService {
   //   this.importPlayerData(JSON.stringify(devPlayers));
   // }
 
-  generateJsonFile() {
+  generateJsonString(): string {
     const player = this.playerService.player();
     const clubs = this.playerService.clubs();
     const matches = this.tournamentService.matches();
@@ -36,7 +36,7 @@ export class ExportJsonService {
     const totalRounds = this.tournamentService.totalRounds();
     const running = this.tournamentService.running();
 
-    const content = {
+    return JSON.stringify({
       player: player,
       clubs: clubs,
       matches: matches,
@@ -44,10 +44,14 @@ export class ExportJsonService {
       round: round,
       totalRounds: totalRounds,
       running: running,
-    };
+    });
+  }
 
+  generateJsonFile() {
     return URL.createObjectURL(
-      new File([JSON.stringify(content)], 'turnier.json', { type: 'application/json' }),
+      new File([this.generateJsonString()], 'turnier.json', {
+        type: 'application/json',
+      }),
     );
   }
 
@@ -120,5 +124,6 @@ export class ExportJsonService {
     this.tournamentService.history.set([]);
     this.tournamentService.round.set(0);
     this.tournamentService.totalRounds.set(content.totalRounds);
+    this.tournamentService.running.set(true);
   }
 }
