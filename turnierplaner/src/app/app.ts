@@ -1,8 +1,8 @@
-import { Component, linkedSignal, signal } from '@angular/core';
+import { Component, inject, linkedSignal, signal } from '@angular/core';
 import { Control } from './components/control/control';
 import { Sidebar } from './components/sidebar/sidebar';
-import { Route } from './app.routes';
 import { TournamentControl } from './components/tournement-control/tournament-control';
+import { RoutingService } from './services/routing.service';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +11,7 @@ import { TournamentControl } from './components/tournement-control/tournament-co
   styleUrl: './app.css',
 })
 export class App {
+  private readonly routingService = inject(RoutingService);
   protected readonly title = signal('turnierplaner');
-  activeRoute = linkedSignal(() => Route.Settings);
+  activeRoute = linkedSignal(() => this.routingService.activeRoute());
 }

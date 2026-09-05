@@ -1,5 +1,5 @@
 export enum Route {
-  Settings,
   FieldView,
+  Settings,
   TableView,
 }

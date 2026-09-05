@@ -1,0 +1,11 @@
+<mat-dialog-content>
+  {{ data.message }}
+</mat-dialog-content>
+<mat-dialog-actions>
+  @if (data.acceptText) {
+    <button mat-button (click)="abort()">Abbrechen</button>
+    <button mat-button (click)="close()">{{ data.acceptText }}</button>
+  } @else {
+    <button mat-button (click)="abort()">Schließen</button>
+  }
+</mat-dialog-actions>

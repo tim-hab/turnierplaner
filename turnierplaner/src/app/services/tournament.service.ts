@@ -1,24 +1,31 @@
-import { inject, Injectable, linkedSignal } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { PlayerService } from './player.service';
 import { Player, sortByElo, sortByPlayedThenFrees } from '../datatypes/player';
 import { Algorithm, Match, newMatch, Team } from '../datatypes/Match';
+import { DialogService } from './dialog.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RoutingService } from './routing.service';
+import { Route } from '../app.routes';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TournamentService {
+  private readonly dialogService = inject(DialogService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly routingService = inject(RoutingService);
   private newID = 0;
   private playerService = inject(PlayerService);
   private fields = 4;
   private Kbasis = 32;
 
-  totalRounds = linkedSignal<number>(() => 5);
-  round = linkedSignal<number>(() => 0);
-  matches = linkedSignal<Match[]>(() => []);
-  freePlayers = linkedSignal<Player[]>(() => []);
-  history = linkedSignal<Match[]>(() => []);
-  showProb = linkedSignal<boolean>(() => false);
-  running = linkedSignal<boolean>(() => true);
+  totalRounds = signal<number>(5);
+  round = signal<number>(0);
+  matches = signal<Match[]>([]);
+  freePlayers = signal<Player[]>([]);
+  history = signal<Match[]>([]);
+  showProb = signal<boolean>(false);
+  running = signal<boolean>(true);
 
   startTournament(
     totalRounds: number,
@@ -43,13 +50,25 @@ export class TournamentService {
   ) {
     this.totalRounds.update(() => round);
     if (this.round() >= this.totalRounds()) {
-      alert('Maximale Runden erreicht');
-      return;
+      this.dialogService
+        .openMessageDialog(
+          'Die maximale Anzahl der Runden ist erreicht. Möchtest du das Turnier Beenden?',
+          'Beenden',
+        )
+        .afterClosed()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((accepted: boolean) => {
+          if (accepted) {
+            this.endTournament();
+            this.routingService.activeRoute.set(Route.TableView);
+          }
+        });
+    } else {
+      this.round.set(this.round() + 1);
+      this.fields = fields;
+      this.playerService.updatePlayerFrees(this.freePlayers());
+      this.generateMatches(eloMod, algorithm, Kbasis);
     }
-    this.round.set(this.round() + 1);
-    this.fields = fields;
-    this.playerService.updatePlayerFrees(this.freePlayers());
-    this.generateMatches(eloMod, algorithm, Kbasis);
   }
 
   generateMatches(eloMod?: number, algorithm?: Algorithm, Kbasis?: number) {
@@ -143,7 +162,7 @@ export class TournamentService {
   endTournament() {
     this.running.set(false);
     this.playerService.player().forEach((player) => {
-      const averageScorePerMatch = Math.round(player.points / player.played);
+      const averageScorePerMatch = Math.round(player.points / player.played) ?? 0;
       player.points += averageScorePerMatch * player.frees;
     });
   }

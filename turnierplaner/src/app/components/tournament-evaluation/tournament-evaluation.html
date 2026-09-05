@@ -1,1 +1,42 @@
-<h2>Turnierauswertung</h2>
+<div class="container background-glow">
+  <h1>Siegerehrung</h1>
+  <p class="subtitle">Die herausragenden Top 3 des Turniers</p>
+
+  <div class="podium-container">
+    <!-- 2. Platz (Links) -->
+    <div class="podium-column col-2">
+      <div class="player-info">
+        <div class="avatar">🥈</div>
+        <div class="player-name">{{ winners[1].name }} ({{ winners[1].club }})</div>
+        <div class="player-score">{{ winners[1].points }} Pkt</div>
+      </div>
+      <div class="step">
+        <div class="rank">2</div>
+      </div>
+    </div>
+
+    <!-- 1. Platz (Mitte) -->
+    <div class="podium-column col-1">
+      <div class="player-info">
+        <div class="avatar">👑</div>
+        <div class="player-name">{{ winners[0].name }} ({{ winners[0].club }})</div>
+        <div class="player-score">{{ winners[0].points }} Pkt</div>
+      </div>
+      <div class="step">
+        <div class="rank">1</div>
+      </div>
+    </div>
+
+    <!-- 3. Platz (Rechts) -->
+    <div class="podium-column col-3">
+      <div class="player-info">
+        <div class="avatar">🥉</div>
+        <div class="player-name">{{ winners[2].name }} ({{ winners[2].club }})</div>
+        <div class="player-score">{{ winners[2].points }} Pkt</div>
+      </div>
+      <div class="step">
+        <div class="rank">3</div>
+      </div>
+    </div>
+  </div>
+</div>
