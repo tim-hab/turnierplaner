@@ -1,4 +1,4 @@
-import { Component, effect, inject, output } from '@angular/core';
+import { Component, DestroyRef, effect, inject, output } from '@angular/core';
 import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,8 @@ import { FileInput } from '../../custom-components/file-input/file-input';
 import { FileExport } from '../../custom-components/file-export/file-export';
 import { PlayerService } from '../../services/player.service';
 import { ExportJsonService } from '../../services/export-json.service';
+import { DialogService } from '../../services/dialog.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-tournament-control',
@@ -37,6 +39,8 @@ export class TournamentControl {
   tournamentService = inject(TournamentService);
   playerService = inject(PlayerService);
   exportService = inject(ExportJsonService);
+  dialogService = inject(DialogService);
+  destroyRef = inject(DestroyRef);
 
   fieldsControl = new FormControl<number>(4, Validators.required);
   roundControl = new FormControl<number>(5, Validators.required);
@@ -79,8 +83,24 @@ export class TournamentControl {
   }
 
   endTournament() {
-    this.tournamentService.endTournament();
-    this.activeRoute.emit(Route.TableView);
+    if (this.tournamentService.round() < this.tournamentService.totalRounds()) {
+      this.dialogService
+        .openMessageDialog(
+          'Die eingestellte Rundenanzahl ist noch nicht erreicht. Möchtest du das Turnier trotzdem beenden?',
+          'Beenden',
+        )
+        .afterClosed()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((accepted: boolean) => {
+          if (accepted) {
+            this.tournamentService.endTournament();
+            this.activeRoute.emit(Route.TableView);
+          }
+        });
+    } else {
+      this.tournamentService.endTournament();
+      this.activeRoute.emit(Route.TableView);
+    }
   }
 
   newTournament() {

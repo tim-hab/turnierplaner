@@ -1,10 +1,8 @@
-<h2>
-  @if (tournamentService.running()) {
-    Live-Tabelle
-  } @else {
-    End-Tabelle
-  }
-</h2>
+@if (tournamentService.running()) {
+  <h2>Live-Tabelle</h2>
+} @else {
+  <app-tournament-evaluation></app-tournament-evaluation>
+}
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
   <!--- Note that these columns can be defined in any order.
         The actual rendered columns are set as a property on the row definition" -->
