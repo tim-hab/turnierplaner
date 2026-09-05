@@ -32,16 +32,16 @@ export function sortByPlayedThenFrees(a: Player, b: Player) {
   else return sortByFrees(a, b);
 }
 
-/**
- *
- * @param eloMod Defines the randomness sorting by elo, a higher value means a lower elo could be at a higher position in the list. Standard Value is 50;
- * @returns
- */
-export function sortByElo(eloMod?: number) {
-  eloMod = eloMod ?? 50;
-  return (a: Player, b: Player) => {
-    return b.elo - a.elo + Math.random() * eloMod;
-  };
+export function sortByElo(a: { elo: number }, b: { elo: number }) {
+  return b.elo - a.elo;
+}
+
+export function sortByEloWithMod(player: Player[], eleMod = 50): Player[] {
+  const idsAndElo = player.map((p) => {
+    return { id: p.id, elo: p.elo + Math.random() * eleMod };
+  });
+  idsAndElo.sort(sortByElo);
+  return idsAndElo.map<Player>((ie) => player.find((p) => p.id === ie.id)!);
 }
 
 export function sortByPointsThenWins(a: Player, b: Player) {
