@@ -1,6 +1,6 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { PlayerService } from './player.service';
-import { Player, sortByElo, sortByPlayedThenFrees } from '../datatypes/player';
+import { Player, sortByElo, sortByEloWithMod, sortByPlayedThenFrees } from '../datatypes/player';
 import { Algorithm, Match, newMatch, Team } from '../datatypes/Match';
 import { DialogService } from './dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -48,26 +48,32 @@ export class TournamentService {
     algorithm?: Algorithm,
     Kbasis?: number,
   ) {
-    this.totalRounds.update(() => round);
-    if (this.round() >= this.totalRounds()) {
-      this.dialogService
-        .openMessageDialog(
-          'Die maximale Anzahl der Runden ist erreicht. Möchtest du das Turnier Beenden?',
-          'Beenden',
-        )
-        .afterClosed()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((accepted: boolean) => {
-          if (accepted) {
-            this.endTournament();
-            this.routingService.activeRoute.set(Route.TableView);
-          }
-        });
+    if (this.matches().some((m) => !m.completed)) {
+      this.dialogService.openMessageDialog(
+        'Die nächste Runde kann erst gestartet werden, wenn alle Spiele der aktuellen Runde beendet wurden.',
+      );
     } else {
-      this.round.set(this.round() + 1);
-      this.fields = fields;
-      this.playerService.updatePlayerFrees(this.freePlayers());
-      this.generateMatches(eloMod, algorithm, Kbasis);
+      this.totalRounds.update(() => round);
+      if (this.round() >= this.totalRounds()) {
+        this.dialogService
+          .openMessageDialog(
+            'Die maximale Anzahl der Runden ist erreicht. Möchtest du das Turnier Beenden?',
+            'Beenden',
+          )
+          .afterClosed()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((accepted: boolean) => {
+            if (accepted) {
+              this.endTournament();
+              this.routingService.activeRoute.set(Route.TableView);
+            }
+          });
+      } else {
+        this.round.set(this.round() + 1);
+        this.fields = fields;
+        this.playerService.updatePlayerFrees(this.freePlayers());
+        this.generateMatches(eloMod, algorithm, Kbasis);
+      }
     }
   }
 
@@ -79,7 +85,7 @@ export class TournamentService {
     if (activePlayers.length / 4 < this.fields) {
       this.fields = Math.floor(activePlayers.length / 4);
     }
-    const player = activePlayers.slice(undefined, 4 * this.fields).sort(sortByElo(eloMod));
+    const player = sortByEloWithMod(activePlayers.slice(undefined, 4 * this.fields), eloMod);
     const frees = activePlayers.slice(4 * this.fields);
     let data: { player: Player[]; newMatches: Match[] };
 
@@ -100,8 +106,23 @@ export class TournamentService {
       console.log('firstWithLast');
     }
 
-    this.matches.update(() => [...data.newMatches]);
+    this.matches.update(() => this.shuffleArray(data.newMatches));
     this.freePlayers.update(() => [...data.player, ...frees]);
+  }
+
+  shuffleArray<T>(array: T[]): T[] {
+    // Create a copy so we don't mutate the original array
+    const shuffled = [...array];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      // Pick a random index from 0 to i
+      const j = Math.floor(Math.random() * (i + 1));
+
+      // Swap elements array[i] and array[j]
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled;
   }
 
   firstWithLastMatches(player: Player[]) {
