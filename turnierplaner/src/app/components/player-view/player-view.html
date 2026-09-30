@@ -7,7 +7,7 @@
     @for (player of [...playerService.player()].sort(sortByName); track player.id) {
       <div class="player-view-content">
         @if (editingId !== player.id) {
-          <button matButton (click)="editName(player.id)" class="text-button">
+          <button matButton (click)="editName(player)" class="text-button">
             {{ player.name }} ({{ player.club }})
           </button>
         }
@@ -19,9 +19,9 @@
               matInput
               type="text"
               [value]="player.name"
-              (blur)="saveName()"
-              (keyup.enter)="saveName()"
-              (input)="updateName(player, $event.target)"
+              (blur)="saveName(player)"
+              (keyup.enter)="saveName(player)"
+              (input)="updateName($event.target)"
               appSelectOnFocusDirective
             />
           </mat-form-field>

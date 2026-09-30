@@ -1,4 +1,4 @@
-import { computed, Injectable, linkedSignal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Player } from '../datatypes/player';
 import { Match } from '../datatypes/Match';
 
@@ -7,9 +7,11 @@ import { Match } from '../datatypes/Match';
 })
 export class PlayerService {
   private newID = 0;
-  player = linkedSignal<Player[]>(() => []);
-  clubs = linkedSignal<string[]>(() => []);
-  activePlayerCount = computed(() => {
+  private readonly playerSignal = signal<Player[]>([]);
+  public readonly player = this.playerSignal.asReadonly();
+  private readonly clubsSignal = signal<string[]>([]);
+  public readonly clubs = this.clubsSignal.asReadonly();
+  public readonly activePlayerCount = computed(() => {
     let count = 0;
     this.player().forEach((player) => {
       if (player.active) count++;
@@ -24,7 +26,7 @@ export class PlayerService {
         this.newID++;
       }
     }
-    this.player.update((l) => [
+    this.playerSignal.update((l) => [
       ...l,
       {
         id: this.newID++,
@@ -42,7 +44,7 @@ export class PlayerService {
   }
 
   addNewClub(name: string) {
-    this.clubs.update((l) => [...l, name]);
+    this.clubsSignal.update((l) => [...l, name]);
   }
 
   updatePlayerAndCalculateElo(match: Match, teamA: number, teamB: number, Kbasis: number) {
@@ -92,18 +94,28 @@ export class PlayerService {
       p.elo += eloAenderungB;
     });
 
-    this.player.update((l) => [...l]);
+    this.playerSignal.update((l) => [...l]);
   }
 
   updatePlayerFrees(list: Player[]) {
     list.forEach((p) => {
       p.frees++;
     });
-    this.player.update((l) => [...l]);
+    this.playerSignal.update((l) => [...l]);
   }
 
   toggleActivePlayer(p: Player) {
     p.active = !p.active;
-    this.player.update((l) => [...l]);
+    this.playerSignal.update((l) => [...l]);
+  }
+
+  loadPlayerData(player: Player[], clubs: string[]) {
+    this.playerSignal.set(player);
+    this.clubsSignal.set(clubs);
+  }
+
+  updatePlayerName(newPlayerName: string, player: Player) {
+    player.name = newPlayerName;
+    this.playerSignal.update((l) => [...l]);
   }
 }

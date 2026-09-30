@@ -19,13 +19,20 @@ export class TournamentService {
   private fields = 4;
   private Kbasis = 32;
 
-  totalRounds = signal<number>(5);
-  round = signal<number>(0);
-  matches = signal<Match[]>([]);
-  freePlayers = signal<Player[]>([]);
-  history = signal<Match[]>([]);
-  showProb = signal<boolean>(false);
-  running = signal<boolean>(true);
+  private readonly totalRoundsSignal = signal<number>(5);
+  public readonly totalRounds = this.totalRoundsSignal.asReadonly();
+  private readonly roundSignal = signal<number>(0);
+  public readonly round = this.roundSignal.asReadonly();
+  private readonly matchesSignal = signal<Match[]>([]);
+  public readonly matches = this.matchesSignal.asReadonly();
+  private readonly freePlayersSignal = signal<Player[]>([]);
+  public readonly freePlayers = this.freePlayersSignal.asReadonly();
+  private readonly historySignal = signal<Match[]>([]);
+  public readonly history = this.historySignal.asReadonly();
+  private readonly showProbSignal = signal<boolean>(false);
+  public readonly showProb = this.showProbSignal.asReadonly();
+  private readonly runningSignal = signal<boolean>(true);
+  public readonly running = this.runningSignal.asReadonly();
 
   startTournament(
     totalRounds: number,
@@ -36,8 +43,8 @@ export class TournamentService {
   ) {
     if (this.playerService.player().length < 4) return alert('Mindestens 4 Spieler!');
     this.fields = fields;
-    this.totalRounds.update(() => totalRounds);
-    this.round.set(1);
+    this.totalRoundsSignal.update(() => totalRounds);
+    this.roundSignal.set(1);
     this.generateMatches(eloMod, algorithm, Kbasis);
   }
 
@@ -48,13 +55,13 @@ export class TournamentService {
     algorithm?: Algorithm,
     Kbasis?: number,
   ) {
-    if (this.matches().some((m) => !m.completed)) {
+    if (this.matchesSignal().some((m) => !m.completed)) {
       this.dialogService.openMessageDialog(
         'Die nächste Runde kann erst gestartet werden, wenn alle Spiele der aktuellen Runde beendet wurden.',
       );
     } else {
-      this.totalRounds.update(() => round);
-      if (this.round() >= this.totalRounds()) {
+      this.totalRoundsSignal.update(() => round);
+      if (this.roundSignal() >= this.totalRoundsSignal()) {
         this.dialogService
           .openMessageDialog(
             'Die maximale Anzahl der Runden ist erreicht. Möchtest du das Turnier Beenden?',
@@ -69,9 +76,9 @@ export class TournamentService {
             }
           });
       } else {
-        this.round.set(this.round() + 1);
+        this.roundSignal.set(this.roundSignal() + 1);
         this.fields = fields;
-        this.playerService.updatePlayerFrees(this.freePlayers());
+        this.playerService.updatePlayerFrees(this.freePlayersSignal());
         this.generateMatches(eloMod, algorithm, Kbasis);
       }
     }
@@ -106,8 +113,12 @@ export class TournamentService {
       console.log('firstWithLast');
     }
 
-    this.matches.update(() => this.shuffleArray(data.newMatches));
-    this.freePlayers.update(() => [...data.player, ...frees]);
+    this.matchesSignal.update(() => {
+      const matches = this.shuffleArray(data.newMatches);
+      matches.forEach((m) => (m.field = matches.indexOf(m) + 1));
+      return matches;
+    });
+    this.freePlayersSignal.update(() => [...data.player, ...frees]);
   }
 
   shuffleArray<T>(array: T[]): T[] {
@@ -130,7 +141,9 @@ export class TournamentService {
     while (player.length >= 4 && newMatches.length < this.fields) {
       const teamA: Team = [player.shift()!, player.pop()!];
       const teamB: Team = [player.shift()!, player.pop()!];
-      newMatches.push(newMatch(this.newID++, this.round(), newMatches.length + 1, teamA, teamB));
+      newMatches.push(
+        newMatch(this.newID++, this.roundSignal(), newMatches.length + 1, teamA, teamB),
+      );
     }
     return { player, newMatches };
   }
@@ -141,7 +154,9 @@ export class TournamentService {
       const teamA: Team = [player.shift()!, player[2]];
       const teamB: Team = [player.shift()!, player.shift()!];
       player.shift();
-      newMatches.push(newMatch(this.newID++, this.round(), newMatches.length + 1, teamA, teamB));
+      newMatches.push(
+        newMatch(this.newID++, this.roundSignal(), newMatches.length + 1, teamA, teamB),
+      );
     }
     return { player, newMatches };
   }
@@ -154,7 +169,13 @@ export class TournamentService {
     const newMatches: Match[] = [];
     while (teams.length > 0) {
       newMatches.push(
-        newMatch(this.newID++, this.round(), newMatches.length + 1, teams.shift()!, teams.pop()!),
+        newMatch(
+          this.newID++,
+          this.roundSignal(),
+          newMatches.length + 1,
+          teams.shift()!,
+          teams.pop()!,
+        ),
       );
     }
     return { player, newMatches };
@@ -168,7 +189,7 @@ export class TournamentService {
   }
 
   updateHistory(match: Match) {
-    this.history.update((h) => [...h, match]);
+    this.historySignal.update((h) => [...h, match]);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -177,14 +198,29 @@ export class TournamentService {
   }
 
   toggleProb() {
-    this.showProb.update((prob) => !prob);
+    this.showProbSignal.update((prob) => !prob);
   }
 
   endTournament() {
-    this.running.set(false);
+    this.runningSignal.set(false);
     this.playerService.player().forEach((player) => {
       const averageScorePerMatch = Math.round(player.points / player.played) ?? 0;
       player.points += averageScorePerMatch * player.frees;
     });
+  }
+
+  loadTournamentData(
+    matches: Match[],
+    history: Match[],
+    round: number,
+    totalRounds: number,
+    running: boolean,
+  ) {
+    this.matchesSignal.set(matches);
+    this.historySignal.set(history);
+    this.roundSignal.set(round);
+    this.totalRoundsSignal.set(totalRounds);
+    this.runningSignal.set(running);
+    this.newID = this.matchesSignal().length;
   }
 }

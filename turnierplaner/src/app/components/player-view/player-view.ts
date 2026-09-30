@@ -27,17 +27,20 @@ export class PlayerView {
   round = Math.round;
   sortByName = sortByName;
   editingId: number | null = null;
+  private newPlayerName = '';
 
-  editName(id: number) {
-    this.editingId = id;
+  editName(player: Player) {
+    this.newPlayerName = player.name;
+    this.editingId = player.id;
   }
 
-  updateName(player: Player, input: HTMLInputElement) {
-    player.name = input.value;
+  updateName(input: HTMLInputElement) {
+    this.newPlayerName = input.value;
   }
 
-  saveName() {
+  saveName(player: Player) {
     this.editingId = null;
-    this.playerService.player.update((l) => [...l]);
+    this.playerService.updatePlayerName(this.newPlayerName, player);
+    this.newPlayerName = '';
   }
 }

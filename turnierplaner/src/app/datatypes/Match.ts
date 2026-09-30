@@ -18,6 +18,45 @@ export interface Score {
   B: number;
 }
 
+export interface MatchExport {
+  id: number;
+  round: number;
+  field: number;
+  teamA: [number, number];
+  teamB: [number, number];
+  prob: { A: string; B: string };
+  score?: Score;
+  completed: boolean;
+}
+
+export function mapMatchToMatchExport(match: Match): MatchExport {
+  return {
+    ...match,
+    teamA: [match.teamA[0].id, match.teamA[1].id],
+    teamB: [match.teamB[0].id, match.teamB[1].id],
+  } as MatchExport;
+}
+
+export function mapMatchExportToMatch(match: MatchExport, player: Player[]): Match | undefined {
+  const teamA = [
+    player.find((p) => (p.id = match.teamA[0])),
+    player.find((p) => (p.id = match.teamA[1])),
+  ];
+  const teamB = [
+    player.find((p) => (p.id = match.teamB[0])),
+    player.find((p) => (p.id = match.teamB[1])),
+  ];
+  if (teamA.includes(undefined) || teamB.includes(undefined)) {
+    return undefined;
+  } else {
+    return {
+      ...match,
+      teamA: teamA as Team,
+      teamB: teamB as Team,
+    };
+  }
+}
+
 export function newMatch(id: number, round: number, field: number, teamA: Team, teamB: Team) {
   return {
     id: id,
