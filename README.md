@@ -55,6 +55,14 @@ npm run build-single
 
 Die Build-Ausgabe liegt unter `dist/`; die Single-File-Ausgabe unter `dist-single/`.
 
+### Releases über GitHub Actions
+
+Der Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) baut die Single-File-Ausgabe und erstellt daraus automatisch ein GitHub Release. Er startet bei einem Tag im Format `v*` oder manuell über `workflow_dispatch`.
+
+Für die Projektverwaltung muss im Repository die Variable `PROJECT_NUMBER` mit der Nummer des GitHub Projects V2 gesetzt werden. Alternativ kann die Projektnummer beim manuellen Start eingegeben werden. Für ein Projekt, dessen Besitzer nicht dem Repository-Besitzer entspricht, kann zusätzlich `PROJECT_OWNER` gesetzt werden. Der Workflow erstellt für den Release-Namen einen Milestone und verschiebt alle Issues und Pull Requests des Projekts, die den Status `Done` haben, nach `Released` und weist ihnen diesen Milestone zu.
+
+Das ausführende Token benötigt Zugriff auf das Projekt sowie Schreibrechte für die betroffenen Repositories. Da Milestones repositorybezogen sind, wird bei Items aus mehreren Repositories in jedem dieser Repositories ein Milestone mit demselben Release-Namen verwendet. Bei einem organisationsweiten Projekt muss gegebenenfalls ein eigenes Repository-Secret mit einem passenden Token verwendet und im Workflow als `GH_TOKEN` gesetzt werden.
+
 ## Projektstruktur
 
 ```text
