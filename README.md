@@ -57,30 +57,3 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-
-
-# Build Process
-
-Baue die Angular Applikation
-
-``` ng build ```
-
-Kopiere den dist Ordner nach angular-desktop
-
-Starte folgenden Container:
-
-~~~
- docker run --rm -ti \
- --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS_TAG|TRAVIS|TRAVIS_REPO_|TRAVIS_BUILD_|TRAVIS_BRANCH|TRAVIS_PULL_REQUEST_|APPVEYOR_|CSC_|GH_|GITHUB_|BT_|AWS_|STRIP|BUILD_') \
- --env ELECTRON_CACHE="/root/.cache/electron" \
- --env ELECTRON_BUILDER_CACHE="/root/.cache/electron-builder" \
- -v ${PWD}:/project \
- -v ${PWD##*/}-node-modules:/project/node_modules \
- -v ~/.cache/electron:/root/.cache/electron \
- -v ~/.cache/electron-builder:/root/.cache/electron-builder \
- electronuserland/builder:wine 
- ~~~
-
- Führe im Container folgenden Befehl aus:
-
- ``` yarn && yarn dist```
