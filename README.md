@@ -1,59 +1,74 @@
 # Turnierplaner
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
+Eine Angular-Anwendung zur Organisation von Badminton-Juxturnieren.
 
-## Development server
+## Voraussetzungen
 
-To start a local development server, run:
+- Node.js mit npm
+- Die im `package.json` festgelegte npm-Version
 
-```bash
-ng serve
-```
+## Entwicklung
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Abhängigkeiten installieren:
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Entwicklungsserver starten:
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+Danach ist die Anwendung unter <http://localhost:4200/> erreichbar.
 
-To build the project run:
+## Qualitätssicherung
+
+Linting ausführen:
 
 ```bash
-ng build
+npm run lint
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Unit-Tests einmalig ausführen:
 
 ```bash
-ng test
+npm test -- --watch=false
 ```
 
-## Running end-to-end tests
+Der Testbestand enthält derzeit noch einige ältere Fixture-Tests, die vor einem vollständig grünen Lauf aktualisiert werden müssen.
 
-For end-to-end (e2e) testing, run:
+## Builds
+
+Produktions-Build erzeugen:
 
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Ein einzelnes, inline eingebettetes HTML-Dokument erzeugen:
 
-## Additional Resources
+```bash
+npm run build-single
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Die Build-Ausgabe liegt unter `dist/`; die Single-File-Ausgabe unter `dist-single/`.
+
+## Projektstruktur
+
+```text
+src/app/
+├── components/   turnierspezifische Ansichten und Steuerungen
+├── core/
+│   ├── datatypes/ Domänenmodelle und Match-Hilfsfunktionen
+│   ├── directives/ globale Direktiven
+│   └── services/  Spieler-, Turnier-, Dialog- und Exportlogik
+└── shared/       wiederverwendbare UI-Bausteine
+```
+
+Die Angular-Anwendung verwendet Standalone-Komponenten. Die Aliase `@core/*` und `@shared/*` stehen sowohl im Produktionscode als auch in den Tests zur Verfügung.
+
+## Datenimport und -export
+
+Turnierdaten können als JSON exportiert und wieder importiert werden. Das Exportformat enthält eine Versionskennung, damit spätere Formatänderungen kontrolliert behandelt werden können.
