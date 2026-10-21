@@ -39,12 +39,12 @@ export function mapMatchToMatchExport(match: Match): MatchExport {
 
 export function mapMatchExportToMatch(match: MatchExport, player: Player[]): Match | undefined {
   const teamA = [
-    player.find((p) => (p.id = match.teamA[0])),
-    player.find((p) => (p.id = match.teamA[1])),
+    player.find((p) => p.id === match.teamA[0]),
+    player.find((p) => p.id === match.teamA[1]),
   ];
   const teamB = [
-    player.find((p) => (p.id = match.teamB[0])),
-    player.find((p) => (p.id = match.teamB[1])),
+    player.find((p) => p.id === match.teamB[0]),
+    player.find((p) => p.id === match.teamB[1]),
   ];
   if (teamA.includes(undefined) || teamB.includes(undefined)) {
     return undefined;

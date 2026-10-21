@@ -1,11 +1,12 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { PlayerService } from './player.service';
-import { Player, sortByEloWithMod, sortByPlayedThenFrees } from '../datatypes/player';
-import { Algorithm, Match, newMatch, Team } from '../datatypes/Match';
+import { Player } from '../datatypes/player';
+import { Algorithm, Match } from '../datatypes/match';
 import { DialogService } from './dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RoutingService } from './routing.service';
 import { Route } from '../../app.routes';
+import { MatchGenerationService } from './match-generation.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,7 @@ export class TournamentService {
   private readonly dialogService = inject(DialogService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly routingService = inject(RoutingService);
+  private readonly matchGenerationService = inject(MatchGenerationService);
   private newID = 0;
   private playerService = inject(PlayerService);
   private fields = 4;
@@ -41,7 +43,10 @@ export class TournamentService {
     algorithm?: Algorithm,
     Kbasis?: number,
   ) {
-    if (this.playerService.player().length < 4) return alert('Mindestens 4 Spieler!');
+    if (this.playerService.player().length < 4) {
+      this.dialogService.openMessageDialog('Mindestens 4 Spieler werden benötigt.');
+      return;
+    }
     this.fields = fields;
     this.totalRoundsSignal.update(() => totalRounds);
     this.roundSignal.set(1);
@@ -86,99 +91,18 @@ export class TournamentService {
 
   generateMatches(eloMod?: number, algorithm?: Algorithm, Kbasis?: number) {
     this.Kbasis = Kbasis ?? 32;
-    const activePlayers = [...this.playerService.player().filter((p) => p.active)].sort(
-      sortByPlayedThenFrees,
+    const result = this.matchGenerationService.generate(
+      this.playerService.player(),
+      this.fields,
+      this.roundSignal(),
+      this.newID,
+      eloMod,
+      algorithm,
     );
-    if (activePlayers.length / 4 < this.fields) {
-      this.fields = Math.floor(activePlayers.length / 4);
-    }
-    const player = sortByEloWithMod(activePlayers.slice(undefined, 4 * this.fields), eloMod);
-    const frees = activePlayers.slice(4 * this.fields);
-    let data: { player: Player[]; newMatches: Match[] };
-
-    let random = Math.random() * 3;
-
-    if (algorithm) {
-      random = algorithm;
-    }
-
-    if (random > 2) {
-      data = this.homogenMatches(player);
-      console.log('homogen');
-    } else if (random > 1) {
-      data = this.heterogenMatches(player);
-      console.log('heterogen');
-    } else {
-      data = this.firstWithLastMatches(player);
-      console.log('firstWithLast');
-    }
-
-    this.matchesSignal.update(() => {
-      const matches = this.shuffleArray(data.newMatches);
-      matches.forEach((m) => (m.field = matches.indexOf(m) + 1));
-      return matches;
-    });
-    this.freePlayersSignal.update(() => [...data.player, ...frees]);
-  }
-
-  shuffleArray<T>(array: T[]): T[] {
-    // Create a copy so we don't mutate the original array
-    const shuffled = [...array];
-
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      // Pick a random index from 0 to i
-      const j = Math.floor(Math.random() * (i + 1));
-
-      // Swap elements array[i] and array[j]
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    return shuffled;
-  }
-
-  firstWithLastMatches(player: Player[]) {
-    const newMatches: Match[] = [];
-    while (player.length >= 4 && newMatches.length < this.fields) {
-      const teamA: Team = [player.shift()!, player.pop()!];
-      const teamB: Team = [player.shift()!, player.pop()!];
-      newMatches.push(
-        newMatch(this.newID++, this.roundSignal(), newMatches.length + 1, teamA, teamB),
-      );
-    }
-    return { player, newMatches };
-  }
-
-  homogenMatches(player: Player[]) {
-    const newMatches: Match[] = [];
-    while (player.length >= 4 && newMatches.length < this.fields) {
-      const teamA: Team = [player.shift()!, player[2]];
-      const teamB: Team = [player.shift()!, player.shift()!];
-      player.shift();
-      newMatches.push(
-        newMatch(this.newID++, this.roundSignal(), newMatches.length + 1, teamA, teamB),
-      );
-    }
-    return { player, newMatches };
-  }
-
-  heterogenMatches(player: Player[]) {
-    const teams: Team[] = [];
-    while (player.length > 0) {
-      teams.push([player.shift()!, player.pop()!]);
-    }
-    const newMatches: Match[] = [];
-    while (teams.length > 0) {
-      newMatches.push(
-        newMatch(
-          this.newID++,
-          this.roundSignal(),
-          newMatches.length + 1,
-          teams.shift()!,
-          teams.pop()!,
-        ),
-      );
-    }
-    return { player, newMatches };
+    this.fields = result.fields;
+    this.newID = result.nextId;
+    this.matchesSignal.set(result.matches);
+    this.freePlayersSignal.set(result.freePlayers);
   }
 
   setWinner(match: Match, teamA: number, teamB: number) {

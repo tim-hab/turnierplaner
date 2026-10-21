@@ -7,7 +7,7 @@ import { TournamentService } from '@core/services/tournament.service';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Route } from '../../app.routes';
 import { MatSelectModule } from '@angular/material/select';
-import { Algorithm } from '@core/datatypes/Match';
+import { Algorithm } from '@core/datatypes/match';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { FileInput } from '@shared/file-input/file-input';

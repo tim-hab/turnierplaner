@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { Player } from '../datatypes/player';
-import { Match } from '../datatypes/Match';
+import { Match } from '../datatypes/match';
 
 @Injectable({
   providedIn: 'root',
