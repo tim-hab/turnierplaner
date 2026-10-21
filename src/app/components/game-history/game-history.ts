@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { TournamentService } from '@core/services/tournament.service';
 import { Player } from '@core/datatypes/player';
-import { Match } from '@core/datatypes/Match';
+import { Match } from '@core/datatypes/match';
 
 export interface Game {
   round: number;

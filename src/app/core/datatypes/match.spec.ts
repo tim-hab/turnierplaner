@@ -1,4 +1,4 @@
-import { mapMatchExportToMatch, MatchExport } from './Match';
+import { mapMatchExportToMatch, MatchExport } from './match';
 import { Player } from './player';
 
 describe('mapMatchExportToMatch', () => {

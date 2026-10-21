@@ -1,7 +1,7 @@
 import { Component, inject, linkedSignal, signal } from '@angular/core';
 import { Control } from './components/control/control';
 import { Sidebar } from './components/sidebar/sidebar';
-import { TournamentControl } from './components/tournement-control/tournament-control';
+import { TournamentControl } from './components/tournament-control/tournament-control';
 import { RoutingService } from './core/services/routing.service';
 
 @Component({

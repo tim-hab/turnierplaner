@@ -1,7 +1,7 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { PlayerService } from './player.service';
 import { Player, sortByEloWithMod, sortByPlayedThenFrees } from '../datatypes/player';
-import { Algorithm, Match, newMatch, Team } from '../datatypes/Match';
+import { Algorithm, Match, newMatch, Team } from '../datatypes/match';
 import { DialogService } from './dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RoutingService } from './routing.service';

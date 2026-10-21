@@ -8,7 +8,7 @@ import {
   mapMatchToMatchExport,
   Match,
   MatchExport,
-} from '../datatypes/Match';
+} from '../datatypes/match';
 import { DialogService } from './dialog.service';
 
 interface Content {

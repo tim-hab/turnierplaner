@@ -3,7 +3,7 @@ import { MatCard, MatCardHeader, MatCardContent, MatCardActions } from '@angular
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatAnchor } from '@angular/material/button';
 import { TournamentService } from '@core/services/tournament.service';
-import { Match } from '@core/datatypes/Match';
+import { Match } from '@core/datatypes/match';
 import { Score } from '@shared/score-form-field/score-input/score-input';
 import {
   FormArray,
