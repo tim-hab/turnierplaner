@@ -43,7 +43,10 @@ export class TournamentService {
     algorithm?: Algorithm,
     Kbasis?: number,
   ) {
-    if (this.playerService.player().length < 4) return alert('Mindestens 4 Spieler!');
+    if (this.playerService.player().length < 4) {
+      this.dialogService.openMessageDialog('Mindestens 4 Spieler werden benötigt.');
+      return;
+    }
     this.fields = fields;
     this.totalRoundsSignal.update(() => totalRounds);
     this.roundSignal.set(1);
