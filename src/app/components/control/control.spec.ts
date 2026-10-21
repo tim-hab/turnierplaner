@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Control } from './control';
+import { Route } from '../../app.routes';
 
 describe('Control', () => {
   let component: Control;
@@ -12,6 +13,8 @@ describe('Control', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(Control);
+    fixture.componentRef.setInput('activeRoute', Route.Settings);
+    fixture.detectChanges();
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
