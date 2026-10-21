@@ -1,0 +1,239 @@
+name: Build and release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'Release name (for example v1.2.3)'
+        required: true
+        type: string
+      project_number:
+        description: 'GitHub Projects V2 number'
+        required: false
+        type: number
+
+permissions:
+  contents: write
+  issues: write
+  repository-projects: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_OWNER: ${{ vars.PROJECT_OWNER || github.repository_owner }}
+      PROJECT_NUMBER: ${{ inputs.project_number || vars.PROJECT_NUMBER }}
+      RELEASE_NAME: ${{ inputs.release_name || github.ref_name }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build single-file application
+        run: npm run build-single
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${RELEASE_NAME}" ]]; then
+            echo "::error::A release name is required."
+            exit 1
+          fi
+
+          if [[ -z "${PROJECT_NUMBER}" ]]; then
+            echo "::error::Set the PROJECT_NUMBER repository variable or provide it as a workflow input."
+            exit 1
+          fi
+
+          mapfile -t files < <(find dist-single -type f -name '*.html' -print)
+          if (( ${#files[@]} == 0 )); then
+            echo "::error::The single-file build did not produce an artifact in dist-single."
+            exit 1
+          fi
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="${RELEASE_NAME}"
+          fi
+
+          gh release create "${tag}" "${files[@]}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${RELEASE_NAME}" \
+            --generate-notes
+
+      - name: Move done project items to released
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PROJECT_NUMBER}" ]]; then
+            echo "::error::Set the PROJECT_NUMBER repository variable or provide it as a workflow input."
+            exit 1
+          fi
+
+          query='
+            query($orgLogin: String!, $userLogin: String!, $number: Int!) {
+              organization: organization(login: $orgLogin) {
+                id
+                projectV2(number: $number) {
+                  id
+                  fields(first: 100) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options { id name }
+                      }
+                    }
+                  }
+                }
+              }
+              user: user(login: $userLogin) {
+                id
+                projectV2(number: $number) {
+                  id
+                  fields(first: 100) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options { id name }
+                      }
+                    }
+                  }
+                }
+              }
+            }'
+
+          project_json="$(gh api graphql \
+            -f query="${query}" \
+            -F orgLogin="${PROJECT_OWNER}" \
+            -F userLogin="${PROJECT_OWNER}" \
+            -F number="${PROJECT_NUMBER}")"
+
+          project="$(jq -c '.data.organization.projectV2 // .data.user.projectV2' <<<"${project_json}")"
+          if [[ "${project}" == "null" ]]; then
+            echo "::error::Project ${PROJECT_OWNER}#${PROJECT_NUMBER} was not found."
+            exit 1
+          fi
+
+          project_id="$(jq -r '.id' <<<"${project}")"
+          status_field="$(jq -c '.fields.nodes[] | select(.name == "Status")' <<<"${project}")"
+          if [[ -z "${status_field}" ]]; then
+            echo "::error::The project has no single-select Status field."
+            exit 1
+          fi
+
+          done_option_id="$(jq -r '.options[] | select(.name == "Done") | .id' <<<"${status_field}")"
+          released_option_id="$(jq -r '.options[] | select(.name == "Released") | .id' <<<"${status_field}")"
+          if [[ -z "${done_option_id}" || -z "${released_option_id}" ]]; then
+            echo "::error::The project Status field must contain both Done and Released options."
+            exit 1
+          fi
+          status_field_id="$(jq -r '.id' <<<"${status_field}")"
+
+          items_query='
+            query($projectId: ID!, $cursor: String) {
+              node(id: $projectId) {
+                ... on ProjectV2 {
+                  items(first: 100, after: $cursor) {
+                    nodes {
+                      id
+                      content {
+                        __typename
+                        ... on Issue { number repository { nameWithOwner } }
+                        ... on PullRequest { number repository { nameWithOwner } }
+                      }
+                      fieldValues(first: 100) {
+                        nodes {
+                          ... on ProjectV2ItemFieldSingleSelectValue {
+                            field { ... on ProjectV2SingleSelectField { name } }
+                            optionId
+                          }
+                        }
+                      }
+                    }
+                    pageInfo { hasNextPage endCursor }
+                  }
+                }
+              }
+            }'
+
+          declare -A milestone_numbers=()
+          cursor=""
+          while :; do
+            if [[ -n "${cursor}" ]]; then
+              items_json="$(gh api graphql -f query="${items_query}" -f projectId="${project_id}" -f cursor="${cursor}")"
+            else
+              items_json="$(gh api graphql -f query="${items_query}" -f projectId="${project_id}" -F cursor=null)"
+            fi
+
+            while IFS=$'\t' read -r item_id content_type issue_number repository status_option_id; do
+              [[ -n "${item_id}" && "${status_option_id}" == "${done_option_id}" ]] || continue
+              [[ -n "${issue_number}" && -n "${repository}" ]] || continue
+
+              if [[ -z "${milestone_numbers[${repository}]+x}" ]]; then
+                milestones_json="$(gh api --paginate --slurp \
+                  "repos/${repository}/milestones?state=all&per_page=100")"
+                milestone_number="$(jq -r --arg release_name "${RELEASE_NAME}" \
+                  '.[].[] | select(.title == $release_name) | .number' <<<"${milestones_json}" | head -n 1)"
+                if [[ -z "${milestone_number}" ]]; then
+                  milestone_number="$(gh api "repos/${repository}/milestones" \
+                    --method POST \
+                    -f title="${RELEASE_NAME}" \
+                    -f description="Items included in release ${RELEASE_NAME}." \
+                    --jq '.number')"
+                fi
+                milestone_numbers["${repository}"]="${milestone_number}"
+              fi
+              milestone_number="${milestone_numbers[${repository}]}"
+
+              gh api graphql \
+                -f query='mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { singleSelectOptionId: $optionId }
+                  }) { projectV2Item { id } }
+                }' \
+                -f projectId="${project_id}" \
+                -f itemId="${item_id}" \
+                -f fieldId="${status_field_id}" \
+                -f optionId="${released_option_id}" >/dev/null
+
+              gh api "repos/${repository}/issues/${issue_number}" \
+                --method PATCH \
+                -F milestone="${milestone_number}" >/dev/null
+              echo "Released ${content_type} #${issue_number}."
+            done < <(jq -r --arg done "${done_option_id}" '
+              .data.node.items.nodes[] |
+              [
+                .id,
+                (.content.__typename // ""),
+                (.content.number // ""),
+                (.content.repository.nameWithOwner // ""),
+                ((.fieldValues.nodes[]? | select(.field.name == "Status") | .optionId) // "")
+              ] | @tsv' <<<"${items_json}")
+
+            has_next_page="$(jq -r '.data.node.items.pageInfo.hasNextPage' <<<"${items_json}")"
+            [[ "${has_next_page}" == "true" ]] || break
+            cursor="$(jq -r '.data.node.items.pageInfo.endCursor' <<<"${items_json}")"
+          done
