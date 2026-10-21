@@ -88,47 +88,54 @@ jobs:
             exit 1
           fi
 
-          query='
-            query($orgLogin: String!, $userLogin: String!, $number: Int!) {
-              organization: organization(login: $orgLogin) {
-                id
-                projectV2(number: $number) {
-                  id
-                  fields(first: 100) {
-                    nodes {
-                      ... on ProjectV2SingleSelectField {
-                        id
-                        name
-                        options { id name }
+          owner_type="$(gh api "users/${PROJECT_OWNER}" --jq '.type')"
+          if [[ "${owner_type}" == "Organization" ]]; then
+            query='
+              query($login: String!, $number: Int!) {
+                owner: organization(login: $login) {
+                  projectV2(number: $number) {
+                    id
+                    fields(first: 100) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          name
+                          options { id name }
+                        }
                       }
                     }
                   }
                 }
-              }
-              user: user(login: $userLogin) {
-                id
-                projectV2(number: $number) {
-                  id
-                  fields(first: 100) {
-                    nodes {
-                      ... on ProjectV2SingleSelectField {
-                        id
-                        name
-                        options { id name }
+              }'
+          elif [[ "${owner_type}" == "User" ]]; then
+            query='
+              query($login: String!, $number: Int!) {
+                owner: user(login: $login) {
+                  projectV2(number: $number) {
+                    id
+                    fields(first: 100) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          name
+                          options { id name }
+                        }
                       }
                     }
                   }
                 }
-              }
-            }'
+              }'
+          else
+            echo "::error::Could not determine whether ${PROJECT_OWNER} is a user or organization."
+            exit 1
+          fi
 
           project_json="$(gh api graphql \
             -f query="${query}" \
-            -F orgLogin="${PROJECT_OWNER}" \
-            -F userLogin="${PROJECT_OWNER}" \
+            -F login="${PROJECT_OWNER}" \
             -F number="${PROJECT_NUMBER}")"
 
-          project="$(jq -c '.data.organization.projectV2 // .data.user.projectV2' <<<"${project_json}")"
+          project="$(jq -c '.data.owner.projectV2' <<<"${project_json}")"
           if [[ "${project}" == "null" ]]; then
             echo "::error::Project ${PROJECT_OWNER}#${PROJECT_NUMBER} was not found."
             exit 1
@@ -223,7 +230,7 @@ jobs:
                 --method PATCH \
                 -F milestone="${milestone_number}" >/dev/null
               echo "Released ${content_type} #${issue_number}."
-            done < <(jq -r --arg done "${done_option_id}" '
+            done < <(jq -r '
               .data.node.items.nodes[] |
               [
                 .id,
