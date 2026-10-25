@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TournamentEvaluation } from './tournament-evaluation';
-import { PlayerService } from '../../core/services/player.service';
-import { Player } from '../../core/datatypes/player';
+import { PlayerService } from '@core/services/player.service';
+import { Player } from '@core/datatypes/player';
 
 describe('TournamentEvaluation', () => {
   let component: TournamentEvaluation;

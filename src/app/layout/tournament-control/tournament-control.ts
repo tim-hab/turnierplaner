@@ -1,11 +1,11 @@
-import { Component, DestroyRef, effect, inject, output } from '@angular/core';
+import { Component, DestroyRef, effect, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TournamentService } from '@core/services/tournament.service';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Route } from '../../app.routes';
 import { MatSelectModule } from '@angular/material/select';
 import { Algorithm } from '@core/datatypes/match';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -41,14 +41,13 @@ export class TournamentControl {
   exportService = inject(ExportJsonService);
   dialogService = inject(DialogService);
   destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   fieldsControl = new FormControl<number>(4, Validators.required);
   roundControl = new FormControl<number>(5, Validators.required);
   algorithmControl = new FormControl<Algorithm>(Algorithm.random, Validators.required);
   eloModControl = new FormControl<number>(50, Validators.required);
   eloAenControl = new FormControl<number>(32, Validators.required);
-
-  activeRoute = output<Route>();
 
   Algorithm = Algorithm;
   matchMaking = false;
@@ -62,7 +61,6 @@ export class TournamentControl {
 
   startTournament() {
     if (this.fieldsControl.valid && this.roundControl.valid) {
-      this.activeRoute.emit(Route.FieldView);
       if (
         this.matchMaking &&
         this.algorithmControl.valid &&
@@ -79,6 +77,7 @@ export class TournamentControl {
       } else {
         this.tournamentService.startTournament(this.roundControl.value!, this.fieldsControl.value!);
       }
+      void this.router.navigate(['/fields']);
     }
   }
 
@@ -94,23 +93,22 @@ export class TournamentControl {
         .subscribe((accepted: boolean) => {
           if (accepted) {
             this.tournamentService.endTournament();
-            this.activeRoute.emit(Route.TableView);
+            void this.router.navigate(['/table']);
           }
         });
     } else {
       this.tournamentService.endTournament();
-      this.activeRoute.emit(Route.TableView);
+      void this.router.navigate(['/table']);
     }
   }
 
   newTournament() {
     this.exportService.importPlayerData(this.exportService.generateJsonString());
-    this.activeRoute.emit(Route.Settings);
+    void this.router.navigate(['/settings']);
   }
 
   nextRound() {
     if (this.fieldsControl.valid && this.roundControl.valid) {
-      this.activeRoute.emit(Route.FieldView);
       if (
         this.matchMaking &&
         this.algorithmControl.valid &&
@@ -127,6 +125,7 @@ export class TournamentControl {
       } else {
         this.tournamentService.nextRound(this.roundControl.value!, this.fieldsControl.value!);
       }
+      void this.router.navigate(['/fields']);
     }
   }
 

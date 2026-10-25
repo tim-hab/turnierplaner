@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { PlayerService } from '../../core/services/player.service';
-import { sortByPointsThenWins } from '../../core/datatypes/player';
+import { PlayerService } from '@core/services/player.service';
+import { sortByPointsThenWins } from '@core/datatypes/player';
 
 @Component({
   selector: 'app-tournament-evaluation',

@@ -1,29 +1,33 @@
 <div class="sidebar">
-  <button
+  <a
     matIconButton
     class="icon"
-    (click)="showSettings()"
+    routerLink="/settings"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
     matTooltip="Einstellungen"
     matTooltipPosition="right"
   >
     <mat-icon class="icon">settings</mat-icon>
-  </button>
-  <button
+  </a>
+  <a
     matIconButton
     class="icon"
-    (click)="showFields()"
+    routerLink="/fields"
+    routerLinkActive="active"
     matTooltip="Felder & Spiele"
     matTooltipPosition="right"
   >
     <mat-icon class="icon">sports_tennis</mat-icon>
-  </button>
-  <button
+  </a>
+  <a
     matIconButton
     class="icon"
-    (click)="showTable()"
+    routerLink="/table"
+    routerLinkActive="active"
     matTooltip="Tabelle"
     matTooltipPosition="right"
   >
     <mat-icon class="icon">table_chart_outlined</mat-icon>
-  </button>
+  </a>
 </div>

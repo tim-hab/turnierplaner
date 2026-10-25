@@ -67,7 +67,8 @@ Das ausführende Token benötigt Zugriff auf das Projekt sowie Schreibrechte fü
 
 ```text
 src/app/
-├── components/   turnierspezifische Ansichten und Steuerungen
+├── layout/       dauerhaft sichtbare App-Shell mit Sidebar und Steuerung
+├── features/     lazy geladene fachliche Bereiche und deren Komponenten
 ├── core/
 │   ├── datatypes/ Domänenmodelle und Match-Hilfsfunktionen
 │   ├── directives/ globale Direktiven
@@ -76,6 +77,20 @@ src/app/
 ```
 
 Die Angular-Anwendung verwendet Standalone-Komponenten. Die Aliase `@core/*` und `@shared/*` stehen sowohl im Produktionscode als auch in den Tests zur Verfügung.
+
+## Navigation
+
+Die Anwendung verwendet den Angular Router mit Hash-URLs:
+
+| URL | Ansicht |
+| --- | --- |
+| `/#/settings` | Turniereinstellungen und Spieler |
+| `/#/fields` | Spielfelder und Spielhistorie |
+| `/#/table` | Live-Tabelle |
+
+Die drei Ansichten werden als lazy geladene Standalone-Seiten eingebunden. Die gemeinsame App-Shell mit Sidebar, Turniersteuerung und `router-outlet` bleibt beim Navigieren bestehen. `/` und unbekannte URLs leiten auf `/#/settings` weiter.
+
+Die Entwicklungsausgabe ist für die Lazy-Chunks vollständig vorbereitet. `build-single` erzeugt weiterhin eine inline eingebettete Startseite; für eine vollständig eigenständige Einzeldatei müssen die durch Lazy Loading erzeugten Chunks zusätzlich in die Auslieferung einbezogen oder für diesen speziellen Build deaktiviert werden.
 
 ## Datenimport und -export
 
