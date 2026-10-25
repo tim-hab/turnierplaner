@@ -4,9 +4,8 @@ import { Player } from '../datatypes/player';
 import { Algorithm, Match } from '../datatypes/match';
 import { DialogService } from './dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RoutingService } from './routing.service';
-import { Route } from '../../app.routes';
 import { MatchGenerationService } from './match-generation.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +13,7 @@ import { MatchGenerationService } from './match-generation.service';
 export class TournamentService {
   private readonly dialogService = inject(DialogService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly routingService = inject(RoutingService);
+  private readonly router = inject(Router);
   private readonly matchGenerationService = inject(MatchGenerationService);
   private newID = 0;
   private playerService = inject(PlayerService);
@@ -77,7 +76,7 @@ export class TournamentService {
           .subscribe((accepted: boolean) => {
             if (accepted) {
               this.endTournament();
-              this.routingService.activeRoute.set(Route.TableView);
+              void this.router.navigate(['/table']);
             }
           });
       } else {
