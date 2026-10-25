@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Sidebar } from './components/sidebar/sidebar';
-import { TournamentControl } from './components/tournament-control/tournament-control';
+import { Sidebar } from './layout/sidebar/sidebar';
+import { TournamentControl } from './layout/tournament-control/tournament-control';
 
 @Component({
   selector: 'app-root',

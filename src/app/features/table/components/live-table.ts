@@ -5,7 +5,7 @@ import { PlayerService } from '@core/services/player.service';
 import { sortByPointsThenWins } from '@core/datatypes/player';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { TournamentService } from '@core/services/tournament.service';
-import { TournamentEvaluation } from '../tournament-evaluation/tournament-evaluation';
+import { TournamentEvaluation } from './tournament-evaluation';
 
 @Component({
   selector: 'app-live-table',

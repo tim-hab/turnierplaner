@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { FieldView } from '../../components/field-view/field-view';
-import { GameHistory } from '../../components/game-history/game-history';
+import { FieldView } from './components/field-view';
+import { GameHistory } from './components/game-history';
 import { TournamentService } from '@core/services/tournament.service';
 
 @Component({

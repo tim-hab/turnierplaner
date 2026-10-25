@@ -67,7 +67,8 @@ Das ausführende Token benötigt Zugriff auf das Projekt sowie Schreibrechte fü
 
 ```text
 src/app/
-├── components/   turnierspezifische Ansichten und Steuerungen
+├── layout/       dauerhaft sichtbare App-Shell mit Sidebar und Steuerung
+├── features/     lazy geladene fachliche Bereiche und deren Komponenten
 ├── core/
 │   ├── datatypes/ Domänenmodelle und Match-Hilfsfunktionen
 │   ├── directives/ globale Direktiven

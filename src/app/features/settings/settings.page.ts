@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AddPlayerCard } from '../../components/add-player-card/add-player-card';
-import { PlayerView } from '../../components/player-view/player-view';
+import { AddPlayerCard } from './components/add-player-card';
+import { PlayerView } from './components/player-view';
 
 @Component({
   selector: 'app-settings-page',

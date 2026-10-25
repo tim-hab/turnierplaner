@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LiveTable } from '../../components/live-table/live-table';
+import { LiveTable } from './components/live-table';
 
 @Component({
   selector: 'app-table-page',
