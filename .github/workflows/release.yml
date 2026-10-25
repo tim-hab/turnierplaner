@@ -41,8 +41,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build single-file application
-        run: npm run build-single
+      - name: Build Electron Windows application
+        run: npm run electron:dist
 
       - name: Create GitHub release
         env:
@@ -60,9 +60,9 @@ jobs:
             exit 1
           fi
 
-          mapfile -t files < <(find dist-single -type f -name '*.html' -print)
+          mapfile -t files < <(find release -type f \( -name '*.exe' -o -name '*.msi' \) -print)
           if (( ${#files[@]} == 0 )); then
-            echo "::error::The single-file build did not produce an artifact in dist-single."
+            echo "::error::The Electron build did not produce a Windows installer in release."
             exit 1
           fi
 

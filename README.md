@@ -69,17 +69,22 @@ getrennt und erstellt anschließend einen Windows-NSIS-Installer unter
 `release/`. Der Produktionsmodus lädt die Angular-Dateien aus `dist/`, während
 `electron:dev` ausschließlich den Dev Server verwendet.
 
-Ein einzelnes, inline eingebettetes HTML-Dokument erzeugen:
+Renderer und Electron-Prozess separat kompilieren:
 
 ```bash
-npm run build-single
+npm run electron:build
 ```
 
-Die Build-Ausgabe liegt unter `dist/`; die Single-File-Ausgabe unter `dist-single/`.
+Der Befehl erzeugt den Angular-Renderer unter `dist/turnierplaner/browser/` und
+kompiliert den Electron-Main- und Preload-Prozess separat nach `electron-dist/`.
+Die relativen Renderer-Pfade stellen sicher, dass auch lazy geladene Angular-
+Chunks und Assets aus dem gepackten Electron-Archiv geladen werden.
 
 ### Releases über GitHub Actions
 
-Der Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) baut die Single-File-Ausgabe und erstellt daraus automatisch ein GitHub Release. Er startet bei einem Tag im Format `v*` oder manuell über `workflow_dispatch`.
+Der Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) baut
+die Electron-Windows-Ausgabe und erstellt daraus automatisch ein GitHub Release.
+Er startet bei einem Tag im Format `v*` oder manuell über `workflow_dispatch`.
 
 Für die Projektverwaltung muss im Repository die Variable `PROJECT_NUMBER` mit der Nummer des GitHub Projects V2 gesetzt werden. Alternativ kann die Projektnummer beim manuellen Start eingegeben werden. Für ein Projekt, dessen Besitzer nicht dem Repository-Besitzer entspricht, kann zusätzlich `PROJECT_OWNER` gesetzt werden. Der Workflow erstellt für den Release-Namen einen Milestone und verschiebt alle Issues und Pull Requests des Projekts, die den Status `Done` haben, nach `Released` und weist ihnen diesen Milestone zu.
 
@@ -112,7 +117,9 @@ Die Anwendung verwendet den Angular Router mit Hash-URLs:
 
 Die drei Ansichten werden als lazy geladene Standalone-Seiten eingebunden. Die gemeinsame App-Shell mit Sidebar, Turniersteuerung und `router-outlet` bleibt beim Navigieren bestehen. `/` und unbekannte URLs leiten auf `/#/settings` weiter.
 
-Die Entwicklungsausgabe ist für die Lazy-Chunks vollständig vorbereitet. `build-single` erzeugt weiterhin eine inline eingebettete Startseite; für eine vollständig eigenständige Einzeldatei müssen die durch Lazy Loading erzeugten Chunks zusätzlich in die Auslieferung einbezogen oder für diesen speziellen Build deaktiviert werden.
+Die Produktionsausgabe ist für die Lazy-Chunks vollständig vorbereitet. Der
+Electron-Build paketiert diese Chunks und die Assets gemeinsam mit dem
+Renderer.
 
 ## Datenimport und -export
 
