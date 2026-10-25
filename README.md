@@ -23,6 +23,17 @@ npm start
 
 Danach ist die Anwendung unter <http://localhost:4200/> erreichbar.
 
+Electron-Entwicklung mit Angular Dev Server starten:
+
+```bash
+npm run electron:dev
+```
+
+Dabei läuft Angular im Entwicklungsmodus auf `http://localhost:4200` und wird
+in einem sicher konfigurierten Electron-Fenster geladen. Angular erhält keinen
+direkten Zugriff auf Node.js oder Electron; die Renderer-Sicherheitsoptionen
+`contextIsolation`, `nodeIntegration` und `sandbox` bleiben aktiviert.
+
 ## Qualitätssicherung
 
 Linting ausführen:
@@ -46,6 +57,17 @@ Produktions-Build erzeugen:
 ```bash
 npm run build
 ```
+
+Windows-Installer erzeugen:
+
+```bash
+npm run electron:dist
+```
+
+Der Befehl kompiliert zunächst Angular und den Electron Main-/Preload-Prozess
+getrennt und erstellt anschließend einen Windows-NSIS-Installer unter
+`release/`. Der Produktionsmodus lädt die Angular-Dateien aus `dist/`, während
+`electron:dev` ausschließlich den Dev Server verwendet.
 
 Ein einzelnes, inline eingebettetes HTML-Dokument erzeugen:
 
