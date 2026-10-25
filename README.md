@@ -69,6 +69,23 @@ getrennt und erstellt anschließend einen Windows-NSIS-Installer unter
 `release/`. Der Produktionsmodus lädt die Angular-Dateien aus `dist/`, während
 `electron:dev` ausschließlich den Dev Server verwendet.
 
+Im Release-Workflow wird die Paketversion aus `package.json` des Branches
+`release` übernommen. Die Versionsänderung muss daher vor dem Release in
+`package.json` und `package-lock.json` committed werden. Ein Commit oder Merge
+auf den Branch `release` mit der Version `1.2.3` erzeugt anschließend ein
+GitHub Release mit dem Tag `v1.2.3`; die Versionsdateien bleiben dadurch
+dauerhaft im Repository erhalten.
+
+Die Builder-Konfiguration liegt in [`electron-builder.yml`](electron-builder.yml).
+Die stabile App-ID `de.timhab.turnierplaner` darf bei späteren Releases nicht
+geändert werden, damit bestehende Installationen aktualisiert werden können.
+Der NSIS-Installer installiert per Maschine, legt eine Verknüpfung im
+Startmenü und auf dem Desktop an und verwendet [`public/favicon.ico`](public/favicon.ico)
+als Browser-Favicon sowie [`build/icon.svg`](build/icon.svg) als Windows-App-Icon.
+Über die benutzerdefinierte Installation kann der
+Installationsordner gewählt werden. Deinstallation und Updates werden durch
+NSIS anhand derselben App-ID und der jeweiligen Versionsnummer verwaltet.
+
 Renderer und Electron-Prozess separat kompilieren:
 
 ```bash
@@ -82,11 +99,19 @@ Chunks und Assets aus dem gepackten Electron-Archiv geladen werden.
 
 ### Releases über GitHub Actions
 
-Der Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) baut
-die Electron-Windows-Ausgabe und erstellt daraus automatisch ein GitHub Release.
-Er startet bei einem Tag im Format `v*` oder manuell über `workflow_dispatch`.
+Der Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) wird
+bei jedem Push auf den dedizierten Branch `release` ausgelöst. Er liest die
+SemVer-Version aus `package.json`, baut die Electron-Windows-Ausgabe und
+erstellt daraus ein GitHub Release mit dem Tag `v<version>`. Der Installer
+wird direkt als Asset an dieses Release angehängt; ein separater Tag-Push ist
+nicht erforderlich.
 
-Für die Projektverwaltung muss im Repository die Variable `PROJECT_NUMBER` mit der Nummer des GitHub Projects V2 gesetzt werden. Alternativ kann die Projektnummer beim manuellen Start eingegeben werden. Für ein Projekt, dessen Besitzer nicht dem Repository-Besitzer entspricht, kann zusätzlich `PROJECT_OWNER` gesetzt werden. Der Workflow erstellt für den Release-Namen einen Milestone und verschiebt alle Issues und Pull Requests des Projekts, die den Status `Done` haben, nach `Released` und weist ihnen diesen Milestone zu.
+Für die Projektverwaltung muss im Repository die Variable `PROJECT_NUMBER` mit
+der Nummer des GitHub Projects V2 gesetzt werden. Für ein Projekt, dessen
+Besitzer nicht dem Repository-Besitzer entspricht, kann zusätzlich
+`PROJECT_OWNER` gesetzt werden. Der Workflow erstellt für den Release-Namen
+einen Milestone und verschiebt alle Issues und Pull Requests des Projekts, die
+den Status `Done` haben, nach `Released` und weist ihnen diesen Milestone zu.
 
 Das ausführende Token benötigt Zugriff auf das Projekt sowie Schreibrechte für die betroffenen Repositories. Da Milestones repositorybezogen sind, wird bei Items aus mehreren Repositories in jedem dieser Repositories ein Milestone mit demselben Release-Namen verwendet. Bei einem organisationsweiten Projekt muss gegebenenfalls ein eigenes Repository-Secret mit einem passenden Token verwendet und im Workflow als `GH_TOKEN` gesetzt werden.
 
