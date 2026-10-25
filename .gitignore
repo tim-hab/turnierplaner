@@ -4,8 +4,9 @@
 /dist
 /tmp
 /out-tsc
+/electron-dist
+/release
 /bazel-out
-/dist-single
 
 # Node
 /node_modules
