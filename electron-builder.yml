@@ -4,6 +4,9 @@ productName: Turnierplaner
 directories:
   output: release
 
+toolsets:
+  wine: 1.0.1
+
 files:
   - electron-dist/**/*
   - dist/turnierplaner/browser/**/*

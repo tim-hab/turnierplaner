@@ -8,7 +8,7 @@
     "electron:compile": "tsc -p tsconfig.electron.json",
     "electron:dev": "concurrently -k \"ng serve --configuration development\" \"wait-on http://localhost:4200 && npm run electron:compile && cross-env ELECTRON_DEV_SERVER_URL=http://localhost:4200 electron .\"",
     "electron:build": "npm run build && npm run electron:compile",
-    "electron:dist": "npm run electron:build && electron-builder --win",
+    "electron:dist": "npm run electron:build && electron-builder --win --publish never",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint"
