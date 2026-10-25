@@ -47,21 +47,6 @@
     "wait-on": "^9.5.1"
   },
   "main": "electron-dist/main.js",
-  "build": {
-    "appId": "de.timhab.turnierplaner",
-    "productName": "Turnierplaner",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "electron-dist/**/*",
-      "dist/turnierplaner/browser/**/*",
-      "package.json"
-    ],
-    "win": {
-      "target": "nsis"
-    }
-  },
   "allowScripts": {
     "esbuild": false
   }

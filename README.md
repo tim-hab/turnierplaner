@@ -69,6 +69,16 @@ getrennt und erstellt anschließend einen Windows-NSIS-Installer unter
 `release/`. Der Produktionsmodus lädt die Angular-Dateien aus `dist/`, während
 `electron:dev` ausschließlich den Dev Server verwendet.
 
+Die Builder-Konfiguration liegt in [`electron-builder.yml`](electron-builder.yml).
+Die stabile App-ID `de.timhab.turnierplaner` darf bei späteren Releases nicht
+geändert werden, damit bestehende Installationen aktualisiert werden können.
+Der NSIS-Installer installiert per Maschine, legt eine Verknüpfung im
+Startmenü und auf dem Desktop an und verwendet [`public/favicon.ico`](public/favicon.ico)
+als Browser-Favicon sowie [`build/icon.svg`](build/icon.svg) als Windows-App-Icon.
+Über die benutzerdefinierte Installation kann der
+Installationsordner gewählt werden. Deinstallation und Updates werden durch
+NSIS anhand derselben App-ID und der jeweiligen Versionsnummer verwaltet.
+
 Renderer und Electron-Prozess separat kompilieren:
 
 ```bash
