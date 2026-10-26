@@ -104,14 +104,18 @@ Die Desktop-App benötigt nach der Installation keine Netzwerkverbindung:
 - Schriftarten und Material Icons werden lokal aus dem Renderer-Bundle geladen.
 - Navigation, Turnierberechnung sowie JSON-Import und -Export laufen vollständig
   lokal.
-- Der aktuelle Turnierstand wird zusätzlich im lokalen App-Speicher gesichert
+- Der aktuelle Turnierstand wird in einer lokalen SQLite-Datenbank gespeichert
   und beim nächsten Start wiederhergestellt.
-- In der Electron-App liegt dieser Speicher ausschließlich im Electron-
+- In der Electron-App liegt die Datenbank ausschließlich im Electron-
   Benutzerverzeichnis (`app.getPath('userData')`), niemals im
-  Installationsverzeichnis. Die JSON-Datei wird atomar über eine temporäre Datei
-  geschrieben; vor jedem erfolgreichen Überschreiben wird die vorherige Datei
-  als `.bak`-Backup gesichert. Ist die Hauptdatei nicht lesbar, wird dieses
-  Backup automatisch verwendet.
+  Installationsverzeichnis. Das Schema wird über versionierte, transaktionale
+  Migrationen aktualisiert. Integritäts-, Lese- und Schreibfehler werden
+  sichtbar gemeldet; ein beschädigter Speicher wird nicht stillschweigend
+  durch einen leeren Turnierstand überschrieben.
+- Die Datenbank ist normalisiert und führt eigene Tabellen für `tournaments`,
+  `players`, `clubs` und `matches`. Spieler und Spiele sind jeweils einem
+  Turnier zugeordnet, sodass mehrere Turniere in derselben Datenbank gespeichert
+  werden können.
 - Es gibt keine verpflichtenden CDN- oder API-Aufrufe. Eine optionale
   Updateprüfung darf Netzwerk verwenden, blockiert den App-Start aber nicht.
 
@@ -169,8 +173,8 @@ Renderer.
 Turnierdaten werden in der Electron-Desktop-App über native Datei-Dialoge als JSON exportiert und wieder importiert. Das Exportformat enthält eine Versionskennung, damit spätere Formatänderungen kontrolliert behandelt werden können.
 
 Die Angular-Fachlogik verwendet dafür `TournamentRepository` statt direkt auf
-Dateien oder Electron zuzugreifen. Aktuell wird `JsonTournamentRepository`
-verwendet. Seine Schnittstelle arbeitet mit einem Turnier-Snapshot und kann
-später durch ein SQLite-Repository im Electron-Main-Prozess ersetzt werden,
-ohne die Angular-Komponenten umzubauen. Der bestehende JSON-Import/-Export
-bleibt davon unabhängig.
+Dateien oder Electron zuzugreifen. In der Desktop-App verwendet die
+Implementierung SQLite im Electron-Main-Prozess; im Browser bleibt
+`localStorage` als Entwicklungs-Fallback aktiv. Der bestehende JSON-Import und
+-Export bleibt als versionsbehaftetes Backup- und Austauschformat unabhängig
+von der Datenbank erhalten.
