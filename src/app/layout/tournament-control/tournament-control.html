@@ -14,19 +14,23 @@
   <div class="tournament-control-buttons">
     @if (tournamentService.round() === 0) {
       <button matButton="filled" class="btn btn-success" (click)="startTournament()">
-        ▶️ Turnier starten
+        <mat-icon aria-hidden="true">play_arrow</mat-icon>
+        Turnier starten
       </button>
     } @else if (!tournamentService.running()) {
       <button matButton="filled" class="btn btn-warning" (click)="newTournament()">
-        🔄 Neues Turnier
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        Neues Turnier
       </button>
     } @else {
       <button matButton="filled" class="btn btn-warning" (click)="nextRound()">
-        🔄 Nächste Runde
+        <mat-icon aria-hidden="true">skip_next</mat-icon>
+        Nächste Runde
       </button>
 
       <button matButton="filled" class="btn btn-danger" (click)="endTournament()">
-        ⏹️ Turnier beenden
+        <mat-icon aria-hidden="true">stop</mat-icon>
+        Turnier beenden
       </button>
     }
     @if (playerService.player().length === 0) {
@@ -96,11 +100,5 @@
   matTooltip="Eingabefelder ein-/ausklappen"
   (click)="toggleCollapsed()"
 >
-  <mat-icon>
-    @if (collapsed) {
-      keyboard_arrow_right
-    } @else {
-      keyboard_arrow_down
-    }
-  </mat-icon>
+  <mat-icon aria-hidden="true">{{ collapsed ? 'keyboard_arrow_right' : 'keyboard_arrow_down' }}</mat-icon>
 </button>

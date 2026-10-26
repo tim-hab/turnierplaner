@@ -97,6 +97,18 @@ kompiliert den Electron-Main- und Preload-Prozess separat nach `electron-dist/`.
 Die relativen Renderer-Pfade stellen sicher, dass auch lazy geladene Angular-
 Chunks und Assets aus dem gepackten Electron-Archiv geladen werden.
 
+### Offline-Betrieb
+
+Die Desktop-App benötigt nach der Installation keine Netzwerkverbindung:
+
+- Schriftarten und Material Icons werden lokal aus dem Renderer-Bundle geladen.
+- Navigation, Turnierberechnung sowie JSON-Import und -Export laufen vollständig
+  lokal.
+- Der aktuelle Turnierstand wird zusätzlich im lokalen App-Speicher gesichert
+  und beim nächsten Start wiederhergestellt.
+- Es gibt keine verpflichtenden CDN- oder API-Aufrufe. Eine optionale
+  Updateprüfung darf Netzwerk verwenden, blockiert den App-Start aber nicht.
+
 ### Releases über GitHub Actions
 
 Der Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) wird
