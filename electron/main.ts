@@ -1,6 +1,8 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
-import { copyFile, readFile, rename, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { TournamentDatabase } from './database';
 
 const developmentUrl = process.env['ELECTRON_DEV_SERVER_URL'];
 
@@ -8,6 +10,8 @@ const OPEN_JSON_CHANNEL = 'storage:open-json';
 const SAVE_JSON_CHANNEL = 'storage:save-json';
 const LOAD_TOURNAMENT_STATE_CHANNEL = 'storage:load-tournament-state';
 const SAVE_TOURNAMENT_STATE_CHANNEL = 'storage:save-tournament-state';
+let tournamentDatabase: TournamentDatabase | undefined;
+let databaseInitializationError: unknown;
 
 interface OpenJsonResult {
   canceled: boolean;
@@ -25,9 +29,28 @@ interface TournamentStateResult {
   error?: string;
 }
 
-const tournamentStatePath = () => join(app.getPath('userData'), 'turnierplaner-state.json');
-const tournamentBackupPath = () => `${tournamentStatePath()}.bak`;
-const tournamentTemporaryPath = () => `${tournamentStatePath()}.tmp`;
+const tournamentDatabasePath = () => join(app.getPath('userData'), 'turnierplaner.sqlite');
+const legacyTournamentStatePath = () => join(app.getPath('userData'), 'turnierplaner-state.json');
+
+const isMissingFileError = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT';
+
+const migrateLegacyTournamentState = (database: TournamentDatabase): void => {
+  if (database.load() !== null) {
+    return;
+  }
+
+  try {
+    const content = readFileSync(legacyTournamentStatePath(), 'utf8');
+    JSON.parse(content);
+    database.save(content);
+    console.info('Der bisherige JSON-Turnierstand wurde in SQLite übernommen.');
+  } catch (error: unknown) {
+    if (!isMissingFileError(error)) {
+      console.error('Der bisherige JSON-Turnierstand konnte nicht übernommen werden.', error);
+    }
+  }
+};
 
 const registerStorageHandlers = () => {
   ipcMain.handle(OPEN_JSON_CHANNEL, async (): Promise<OpenJsonResult> => {
@@ -80,28 +103,17 @@ const registerStorageHandlers = () => {
     }
   });
 
-  ipcMain.handle(
-    LOAD_TOURNAMENT_STATE_CHANNEL,
-    async (): Promise<TournamentStateResult> => {
-      try {
-        const content = await readFile(tournamentStatePath(), 'utf8');
-        JSON.parse(content);
-        return { content };
-      } catch (error: unknown) {
-        try {
-          const content = await readFile(tournamentBackupPath(), 'utf8');
-          JSON.parse(content);
-          console.warn('Der primäre Turnierstand war nicht lesbar; Backup wurde verwendet.', error);
-          return { content };
-        } catch (backupError: unknown) {
-          console.error('Failed to read tournament state or backup.', backupError);
-          return {
-            error: 'Der gespeicherte Turnierstand konnte nicht gelesen werden.',
-          };
-        }
+  ipcMain.handle(LOAD_TOURNAMENT_STATE_CHANNEL, async (): Promise<TournamentStateResult> => {
+    try {
+      if (databaseInitializationError) {
+        throw databaseInitializationError;
       }
-    },
-  );
+      return { content: tournamentDatabase?.load() ?? undefined };
+    } catch (error: unknown) {
+      console.error('Failed to read tournament state from SQLite.', error);
+      return { error: 'Die Turnierdatenbank konnte nicht gelesen werden.' };
+    }
+  });
 
   ipcMain.handle(
     SAVE_TOURNAMENT_STATE_CHANNEL,
@@ -111,20 +123,19 @@ const registerStorageHandlers = () => {
       }
 
       try {
-        const statePath = tournamentStatePath();
-        await writeFile(tournamentTemporaryPath(), content, 'utf8');
-        try {
-          await copyFile(statePath, tournamentBackupPath());
-        } catch {
-          // There is no backup on the first save.
+        if (databaseInitializationError) {
+          throw databaseInitializationError;
         }
-        await rename(tournamentTemporaryPath(), statePath);
+        if (!tournamentDatabase) {
+          throw new Error('The tournament database is not initialized.');
+        }
+        tournamentDatabase.save(content);
         return { canceled: false };
       } catch (error: unknown) {
-        console.error('Failed to write tournament state.', error);
+        console.error('Failed to write tournament state to SQLite.', error);
         return {
           canceled: false,
-          error: 'Der Turnierstand konnte nicht gespeichert werden.',
+          error: 'Die Turnierdatenbank konnte nicht gespeichert werden.',
         };
       }
     },
@@ -154,6 +165,13 @@ const createWindow = async (): Promise<void> => {
 app
   .whenReady()
   .then(async () => {
+    try {
+      tournamentDatabase = new TournamentDatabase(tournamentDatabasePath());
+      migrateLegacyTournamentState(tournamentDatabase);
+    } catch (error: unknown) {
+      databaseInitializationError = error;
+      console.error('Failed to initialize tournament database.', error);
+    }
     registerStorageHandlers();
     await createWindow();
 
@@ -172,4 +190,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  tournamentDatabase?.close();
 });
