@@ -1,16 +1,29 @@
 import { TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
 import { PlayerService } from './player.service';
 import { TournamentService } from './tournament.service';
+import { DialogService } from './dialog.service';
+import { FileStorageService } from './file-storage.service';
 
 import { ExportJsonService } from './export-json.service';
 
 describe('ExportJsonService', () => {
   let service: ExportJsonService;
+  const dialogService = {
+    openImportDialog: vi.fn(),
+    openMessageDialog: vi.fn(),
+  };
+  const fileStorageService = {
+    openJsonFile: vi.fn(),
+    saveJsonFile: vi.fn(),
+  };
 
   beforeEach(() => {
+    vi.clearAllMocks();
     TestBed.configureTestingModule({
-      providers: [{ provide: MatDialog, useValue: { open: vi.fn() } }],
+      providers: [
+        { provide: DialogService, useValue: dialogService },
+        { provide: FileStorageService, useValue: fileStorageService },
+      ],
     });
     service = TestBed.inject(ExportJsonService);
   });
@@ -88,10 +101,65 @@ describe('ExportJsonService', () => {
   });
 
   it('reports invalid JSON through the dialog service', () => {
-    const dialog = TestBed.inject(MatDialog);
-
     service.importJsonString('{invalid');
 
-    expect(dialog.open).toHaveBeenCalled();
+    expect(dialogService.openMessageDialog).toHaveBeenCalled();
+  });
+
+  it('opens import dialog after successful file import', async () => {
+    fileStorageService.openJsonFile.mockResolvedValue({ canceled: false, content: '{"player":[],"clubs":[]}' });
+
+    await service.importJsonFromFile();
+
+    expect(dialogService.openImportDialog).toHaveBeenCalledWith('{"player":[],"clubs":[]}');
+  });
+
+  it('does not show an error when file import is canceled', async () => {
+    fileStorageService.openJsonFile.mockResolvedValue({ canceled: true });
+
+    await service.importJsonFromFile();
+
+    expect(dialogService.openMessageDialog).not.toHaveBeenCalled();
+    expect(dialogService.openImportDialog).not.toHaveBeenCalled();
+  });
+
+  it('shows an error when file import fails', async () => {
+    fileStorageService.openJsonFile.mockResolvedValue({
+      canceled: false,
+      error: 'Die ausgewählte Datei konnte nicht gelesen werden.',
+    });
+
+    await service.importJsonFromFile();
+
+    expect(dialogService.openMessageDialog).toHaveBeenCalledWith(
+      'Die ausgewählte Datei konnte nicht gelesen werden.',
+    );
+  });
+
+  it('writes export content through file storage', async () => {
+    fileStorageService.saveJsonFile.mockResolvedValue({ canceled: false });
+
+    await service.exportJsonToFile();
+
+    expect(fileStorageService.saveJsonFile).toHaveBeenCalledWith(service.generateJsonString());
+  });
+
+  it('shows an error when file export fails', async () => {
+    fileStorageService.saveJsonFile.mockResolvedValue({
+      canceled: false,
+      error: 'Die Datei konnte nicht gespeichert werden.',
+    });
+
+    await service.exportJsonToFile();
+
+    expect(dialogService.openMessageDialog).toHaveBeenCalledWith('Die Datei konnte nicht gespeichert werden.');
+  });
+
+  it('does not show an error when file export is canceled', async () => {
+    fileStorageService.saveJsonFile.mockResolvedValue({ canceled: true });
+
+    await service.exportJsonToFile();
+
+    expect(dialogService.openMessageDialog).not.toHaveBeenCalled();
   });
 });

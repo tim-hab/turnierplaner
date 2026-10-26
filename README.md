@@ -148,4 +148,4 @@ Renderer.
 
 ## Datenimport und -export
 
-Turnierdaten können als JSON exportiert und wieder importiert werden. Das Exportformat enthält eine Versionskennung, damit spätere Formatänderungen kontrolliert behandelt werden können.
+Turnierdaten werden in der Electron-Desktop-App über native Datei-Dialoge als JSON exportiert und wieder importiert. Das Exportformat enthält eine Versionskennung, damit spätere Formatänderungen kontrolliert behandelt werden können.

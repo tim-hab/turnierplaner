@@ -11,10 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class FileExport {
   private jsonService = inject(ExportJsonService);
 
-  exportJsonFile(anchor: HTMLAnchorElement) {
-    const url = this.jsonService.generateJsonFile();
-    anchor.href = url;
-    anchor.click();
-    URL.revokeObjectURL(url);
+  exportJsonFile() {
+    void this.jsonService.exportJsonToFile();
   }
 }
