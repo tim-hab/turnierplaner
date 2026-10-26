@@ -106,6 +106,12 @@ Die Desktop-App benötigt nach der Installation keine Netzwerkverbindung:
   lokal.
 - Der aktuelle Turnierstand wird zusätzlich im lokalen App-Speicher gesichert
   und beim nächsten Start wiederhergestellt.
+- In der Electron-App liegt dieser Speicher ausschließlich im Electron-
+  Benutzerverzeichnis (`app.getPath('userData')`), niemals im
+  Installationsverzeichnis. Die JSON-Datei wird atomar über eine temporäre Datei
+  geschrieben; vor jedem erfolgreichen Überschreiben wird die vorherige Datei
+  als `.bak`-Backup gesichert. Ist die Hauptdatei nicht lesbar, wird dieses
+  Backup automatisch verwendet.
 - Es gibt keine verpflichtenden CDN- oder API-Aufrufe. Eine optionale
   Updateprüfung darf Netzwerk verwenden, blockiert den App-Start aber nicht.
 
@@ -161,3 +167,10 @@ Renderer.
 ## Datenimport und -export
 
 Turnierdaten werden in der Electron-Desktop-App über native Datei-Dialoge als JSON exportiert und wieder importiert. Das Exportformat enthält eine Versionskennung, damit spätere Formatänderungen kontrolliert behandelt werden können.
+
+Die Angular-Fachlogik verwendet dafür `TournamentRepository` statt direkt auf
+Dateien oder Electron zuzugreifen. Aktuell wird `JsonTournamentRepository`
+verwendet. Seine Schnittstelle arbeitet mit einem Turnier-Snapshot und kann
+später durch ein SQLite-Repository im Electron-Main-Prozess ersetzt werden,
+ohne die Angular-Komponenten umzubauen. Der bestehende JSON-Import/-Export
+bleibt davon unabhängig.

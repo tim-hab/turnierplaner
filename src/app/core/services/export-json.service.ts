@@ -7,10 +7,10 @@ import {
   mapMatchExportToMatch,
   mapMatchToMatchExport,
   Match,
-  MatchExport,
 } from '../datatypes/match';
 import { DialogService } from './dialog.service';
 import { FileStorageService } from './file-storage.service';
+import { TournamentSnapshot } from '../repositories/tournament-repository';
 
 interface Content {
   player: Player[];
@@ -22,16 +22,7 @@ interface Content {
   running: boolean;
 }
 
-interface JsonContent {
-  version: string;
-  player: Player[];
-  clubs: string[];
-  matches: MatchExport[];
-  history: MatchExport[];
-  round: number;
-  totalRounds: number;
-  running: boolean;
-}
+type JsonContent = TournamentSnapshot;
 
 class MatchLoadingError extends Error {
   constructor() {
@@ -67,24 +58,20 @@ export class ExportJsonService {
   // }
 
   generateJsonString(): string {
-    const player = this.playerService.player();
-    const clubs = this.playerService.clubs();
-    const matches = this.tournamentService.matches().map((m) => mapMatchToMatchExport(m));
-    const history = this.tournamentService.history().map((m) => mapMatchToMatchExport(m));
-    const round = this.tournamentService.round();
-    const totalRounds = this.tournamentService.totalRounds();
-    const running = this.tournamentService.running();
+    return JSON.stringify(this.createSnapshot());
+  }
 
-    return JSON.stringify({
+  createSnapshot(): TournamentSnapshot {
+    return {
       version: this.EXPORT_VERSION,
-      player: player,
-      clubs: clubs,
-      matches: matches,
-      history: history,
-      round: round,
-      totalRounds: totalRounds,
-      running: running,
-    } as JsonContent);
+      player: this.playerService.player(),
+      clubs: this.playerService.clubs(),
+      matches: this.tournamentService.matches().map((m) => mapMatchToMatchExport(m)),
+      history: this.tournamentService.history().map((m) => mapMatchToMatchExport(m)),
+      round: this.tournamentService.round(),
+      totalRounds: this.tournamentService.totalRounds(),
+      running: this.tournamentService.running(),
+    };
   }
 
   async importJsonFromFile() {

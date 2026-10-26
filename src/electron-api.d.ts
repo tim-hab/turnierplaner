@@ -9,10 +9,17 @@ interface JsonSaveResult {
   error?: string;
 }
 
+interface TournamentStateResult {
+  content?: string;
+  error?: string;
+}
+
 interface ElectronApi {
   isAvailable: boolean;
   openJsonFile: () => Promise<JsonOpenResult>;
   saveJsonFile: (content: string) => Promise<JsonSaveResult>;
+  loadTournamentState?: () => Promise<TournamentStateResult>;
+  saveTournamentState?: (content: string) => Promise<JsonSaveResult>;
 }
 
 declare global {
