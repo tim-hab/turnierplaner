@@ -10,6 +10,7 @@ import {
   MatchExport,
 } from '../datatypes/match';
 import { DialogService } from './dialog.service';
+import { FileStorageService } from './file-storage.service';
 
 interface Content {
   player: Player[];
@@ -57,6 +58,7 @@ export class ExportJsonService {
   private playerService = inject(PlayerService);
   private tournamentService = inject(TournamentService);
   private readonly dialogService = inject(DialogService);
+  private readonly fileStorage = inject(FileStorageService);
   private readonly EXPORT_VERSION = 'v1.0.0';
 
   //dev settings
@@ -85,12 +87,30 @@ export class ExportJsonService {
     } as JsonContent);
   }
 
-  generateJsonFile() {
-    return URL.createObjectURL(
-      new File([this.generateJsonString()], 'turnier.json', {
-        type: 'application/json',
-      }),
-    );
+  async importJsonFromFile() {
+    const result = await this.fileStorage.openJsonFile();
+    if (result.canceled) {
+      return;
+    }
+    if (!result.content) {
+      const message = result.error ?? 'Datei konnte nicht gelesen werden.';
+      console.error(message);
+      this.dialogService.openMessageDialog(message);
+      return;
+    }
+
+    this.dialogService.openImportDialog(result.content);
+  }
+
+  async exportJsonToFile() {
+    const result = await this.fileStorage.saveJsonFile(this.generateJsonString());
+    if (result.canceled) {
+      return;
+    }
+    if (result.error) {
+      console.error(result.error);
+      this.dialogService.openMessageDialog(result.error);
+    }
   }
 
   importJsonString(input: string) {
