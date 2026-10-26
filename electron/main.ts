@@ -1,11 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
-import { readFile, writeFile } from 'node:fs/promises';
+import { copyFile, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const developmentUrl = process.env['ELECTRON_DEV_SERVER_URL'];
 
 const OPEN_JSON_CHANNEL = 'storage:open-json';
 const SAVE_JSON_CHANNEL = 'storage:save-json';
+const LOAD_TOURNAMENT_STATE_CHANNEL = 'storage:load-tournament-state';
+const SAVE_TOURNAMENT_STATE_CHANNEL = 'storage:save-tournament-state';
 
 interface OpenJsonResult {
   canceled: boolean;
@@ -17,6 +19,15 @@ interface SaveJsonResult {
   canceled: boolean;
   error?: string;
 }
+
+interface TournamentStateResult {
+  content?: string;
+  error?: string;
+}
+
+const tournamentStatePath = () => join(app.getPath('userData'), 'turnierplaner-state.json');
+const tournamentBackupPath = () => `${tournamentStatePath()}.bak`;
+const tournamentTemporaryPath = () => `${tournamentStatePath()}.tmp`;
 
 const registerStorageHandlers = () => {
   ipcMain.handle(OPEN_JSON_CHANNEL, async (): Promise<OpenJsonResult> => {
@@ -68,6 +79,56 @@ const registerStorageHandlers = () => {
       };
     }
   });
+
+  ipcMain.handle(
+    LOAD_TOURNAMENT_STATE_CHANNEL,
+    async (): Promise<TournamentStateResult> => {
+      try {
+        const content = await readFile(tournamentStatePath(), 'utf8');
+        JSON.parse(content);
+        return { content };
+      } catch (error: unknown) {
+        try {
+          const content = await readFile(tournamentBackupPath(), 'utf8');
+          JSON.parse(content);
+          console.warn('Der primäre Turnierstand war nicht lesbar; Backup wurde verwendet.', error);
+          return { content };
+        } catch (backupError: unknown) {
+          console.error('Failed to read tournament state or backup.', backupError);
+          return {
+            error: 'Der gespeicherte Turnierstand konnte nicht gelesen werden.',
+          };
+        }
+      }
+    },
+  );
+
+  ipcMain.handle(
+    SAVE_TOURNAMENT_STATE_CHANNEL,
+    async (_event, content: string): Promise<SaveJsonResult> => {
+      if (typeof content !== 'string') {
+        return { canceled: false, error: 'Ungültige Turnierdaten.' };
+      }
+
+      try {
+        const statePath = tournamentStatePath();
+        await writeFile(tournamentTemporaryPath(), content, 'utf8');
+        try {
+          await copyFile(statePath, tournamentBackupPath());
+        } catch {
+          // There is no backup on the first save.
+        }
+        await rename(tournamentTemporaryPath(), statePath);
+        return { canceled: false };
+      } catch (error: unknown) {
+        console.error('Failed to write tournament state.', error);
+        return {
+          canceled: false,
+          error: 'Der Turnierstand konnte nicht gespeichert werden.',
+        };
+      }
+    },
+  );
 };
 
 const createWindow = async (): Promise<void> => {
