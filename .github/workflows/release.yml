@@ -45,8 +45,39 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check Windows signing secrets
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${CSC_LINK}" || -z "${CSC_KEY_PASSWORD}" ]]; then
+            echo "::error::Set WINDOWS_CERTIFICATE_BASE64 and WINDOWS_CERTIFICATE_PASSWORD repository secrets."
+            exit 1
+          fi
+
       - name: Build Electron Windows application
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npm run electron:dist
+
+      - name: Verify signed Windows artifacts
+        shell: pwsh
+        run: |
+          $artifacts = Get-ChildItem -Path release -Recurse -File |
+            Where-Object { $_.Extension -in '.exe', '.msi' }
+          if ($artifacts.Count -eq 0) {
+            Write-Error 'The Electron build did not produce a Windows installer.'
+          }
+          foreach ($artifact in $artifacts) {
+            $signature = Get-AuthenticodeSignature -FilePath $artifact.FullName
+            if ($signature.Status -ne 'Valid') {
+              Write-Error "Invalid Authenticode signature: $($artifact.FullName) ($($signature.Status))"
+            }
+          }
 
       - name: Create GitHub release
         env:
@@ -59,9 +90,9 @@ jobs:
             exit 1
           fi
 
-          mapfile -t files < <(find release -type f \( -name '*.exe' -o -name '*.msi' \) -print)
+          mapfile -t files < <(find release -type f -print)
           if (( ${#files[@]} == 0 )); then
-            echo "::error::The Electron build did not produce a Windows installer in release."
+            echo "::error::The Electron build did not produce release files."
             exit 1
           fi
 

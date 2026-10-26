@@ -14,10 +14,19 @@ files:
 
 win:
   icon: build/icon.svg
+  publisherName: tim-hab
+  signingHashAlgorithms:
+    - sha256
   target:
     - target: nsis
       arch:
         - x64
+
+publish:
+  provider: github
+  owner: tim-hab
+  repo: turnierplaner
+  releaseType: release
 
 nsis:
   oneClick: false

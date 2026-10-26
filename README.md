@@ -118,6 +118,68 @@ erstellt daraus ein GitHub Release mit dem Tag `v<version>`. Der Installer
 wird direkt als Asset an dieses Release angehängt; ein separater Tag-Push ist
 nicht erforderlich.
 
+### Windows-Signierung und automatische Updates
+
+Die Publisher-Identität der Anwendung ist `tim-hab`. Sie muss dem Publisher-
+Namen des Windows-Zertifikats entsprechen; bei einer Zertifikatsbestellung ist
+die rechtliche Identität des Zertifikatsinhabers maßgeblich. Die stabile
+Electron-App-ID `de.timhab.turnierplaner` und der GitHub-Update-Provider dürfen
+nach dem ersten öffentlichen Release nicht geändert werden.
+
+Für öffentliche Releases wird ein OV-Code-Signing-Zertifikat als verschlüsselte
+PFX-Datei außerhalb des Repositorys verwendet. Der private Schlüssel wird
+nicht exportiert oder committed. Im Repository müssen folgende Actions-Secrets
+angelegt werden:
+
+- `WINDOWS_CERTIFICATE_BASE64`: Base64-Inhalt der PFX-Datei
+- `WINDOWS_CERTIFICATE_PASSWORD`: Passwort der PFX-Datei
+
+Beispiel für die lokale Vorbereitung (die erzeugte Datei nicht einchecken):
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes('tim-hab.pfx')) |
+  Set-Content -NoNewline windows-certificate.base64
+```
+
+Der Workflow [`release.yml`](.github/workflows/release.yml) bricht ohne beide
+Secrets ab, signiert Installer und Electron-Binaries über `electron-builder`
+und prüft anschließend jede EXE/MSI-Datei mit Authenticode. Zusätzlich werden
+`latest.yml` und Blockmap-Dateien in das GitHub Release geladen; diese
+Metadaten werden von `electron-updater` benötigt. `electron-updater` prüft auf
+Windows die Signatur des heruntergeladenen Updates gegen den konfigurierten
+Publisher und verwirft nicht passende Updates.
+
+#### Erstmalige Abnahme
+
+1. Ein Testzertifikat bzw. das produktive OV-Zertifikat bei einem anerkannten
+   Anbieter bestellen und den Subject-/Publisher-Namen dokumentieren.
+2. Beide Secrets als Repository- oder Environment-Secrets mit minimalen
+   Berechtigungen hinterlegen. Die Zertifikatsdatei und lokale Base64-Datei
+   nach dem Upload sicher löschen.
+3. Einen Release-Branch mit einer neuen SemVer-Version bauen und auf dem
+   Windows-Testgerät in den Eigenschaften jeder EXE unter **Digitale
+   Signaturen** den erwarteten Herausgeber prüfen.
+4. Den Installer auf einem nicht zuvor verwendeten Windows-Profil ausführen
+   und SmartScreen-Status, Zertifikatskette und Herausgeber dokumentieren.
+   Ein OV-Zertifikat beseitigt die SmartScreen-Reputationsphase nicht
+   automatisch; Reputation wird über signierte Downloads aufgebaut.
+5. Von Version `N` auf `N+1` aktualisieren. Im Test zusätzlich ein Release mit
+   absichtlich nicht passender oder nicht signierter EXE bereitstellen. Dieses
+   Update muss von `electron-updater` abgelehnt werden; die Fehlermeldung muss
+   im Electron-Log erscheinen.
+
+#### Ablauf und Rotation
+
+Das Zertifikat und sein Ablaufdatum werden im Passwortmanager bzw. im
+Zertifikatsinventar des Publisher-Inhabers geführt, nicht im Repository.
+Mindestens 60 Tage vor Ablauf ein neues Zertifikat bestellen, die PFX-Secrets
+in einer geschützten Umgebung aktualisieren und einen vollständigen Testrelease
+durchführen. Alte Secrets erst nach erfolgreicher Installation und
+Updateprüfung mit dem neuen Zertifikat entfernen. Bereits veröffentlichte
+Artefakte bleiben mit dem alten Zertifikat gültig; deshalb alte Zertifikate
+und deren öffentliche Kette gemäß der Aufbewahrungsrichtlinie archivieren,
+private Schlüssel aber niemals ins Repository oder in Actions-Logs schreiben.
+
 Für die Projektverwaltung muss im Repository die Variable `PROJECT_NUMBER` mit
 der Nummer des GitHub Projects V2 gesetzt werden. Für ein Projekt, dessen
 Besitzer nicht dem Repository-Besitzer entspricht, kann zusätzlich

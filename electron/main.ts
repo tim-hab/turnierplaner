@@ -1,4 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -17,6 +18,25 @@ interface SaveJsonResult {
   canceled: boolean;
   error?: string;
 }
+
+const configureAutoUpdater = (): void => {
+  if (!app.isPackaged || process.platform !== 'win32') {
+    return;
+  }
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('error', (error) => {
+    console.error('Signed update check failed.', error);
+  });
+  autoUpdater.on('update-downloaded', (updateInfo) => {
+    console.info(`Signed update ${updateInfo.version} downloaded.`);
+  });
+
+  void autoUpdater.checkForUpdates().catch((error: unknown) => {
+    console.error('Signed update check failed.', error);
+  });
+};
 
 const registerStorageHandlers = () => {
   ipcMain.handle(OPEN_JSON_CHANNEL, async (): Promise<OpenJsonResult> => {
@@ -94,6 +114,7 @@ app
   .whenReady()
   .then(async () => {
     registerStorageHandlers();
+    configureAutoUpdater();
     await createWindow();
 
     app.on('activate', () => {
