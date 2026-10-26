@@ -7,16 +7,16 @@ const developmentUrl = process.env['ELECTRON_DEV_SERVER_URL'];
 const OPEN_JSON_CHANNEL = 'storage:open-json';
 const SAVE_JSON_CHANNEL = 'storage:save-json';
 
-type OpenJsonResult = {
+interface OpenJsonResult {
   canceled: boolean;
   content?: string;
   error?: string;
-};
+}
 
-type SaveJsonResult = {
+interface SaveJsonResult {
   canceled: boolean;
   error?: string;
-};
+}
 
 const registerStorageHandlers = () => {
   ipcMain.handle(OPEN_JSON_CHANNEL, async (): Promise<OpenJsonResult> => {
@@ -87,9 +87,7 @@ const createWindow = async (): Promise<void> => {
     return;
   }
 
-  await window.loadFile(
-    join(__dirname, '..', 'dist', 'turnierplaner', 'browser', 'index.html'),
-  );
+  await window.loadFile(join(__dirname, '..', 'dist', 'turnierplaner', 'browser', 'index.html'));
 };
 
 app
