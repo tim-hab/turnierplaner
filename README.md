@@ -93,12 +93,11 @@ ungespeicherte Änderungen und bietet Speichern, Verwerfen oder Abbrechen an.
 Entwicklerwerkzeuge sind ausschließlich im Entwicklungsmodus verfügbar;
 externe Links werden kontrolliert im Standardbrowser geöffnet.
 
-Im Release-Workflow wird die Paketversion aus `package.json` des Branches
-`release` übernommen. Die Versionsänderung muss daher vor dem Release in
-`package.json` und `package-lock.json` committed werden. Ein Commit oder Merge
-auf den Branch `release` mit der Version `1.2.3` erzeugt anschließend ein
-GitHub Release mit dem Tag `v1.2.3`; die Versionsdateien bleiben dadurch
-dauerhaft im Repository erhalten.
+Im Release-Workflow wird ein Push eines Tags im Format `v1.2.3` verarbeitet. Die
+Tag-Version muss mit der Version in `package.json` und `package-lock.json`
+übereinstimmen. Der Workflow baut die Electron-Windows-Anwendung und erstellt
+daraus das GitHub Release; die Versionsdateien bleiben dauerhaft im Repository
+erhalten.
 
 Die Builder-Konfiguration liegt in [`electron-builder.yml`](electron-builder.yml).
 Die stabile App-ID `de.timhab.turnierplaner` darf bei späteren Releases nicht
@@ -146,11 +145,14 @@ Die Desktop-App benötigt nach der Installation keine Netzwerkverbindung:
 ### Releases über GitHub Actions
 
 Der Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) wird
-bei jedem Push auf den dedizierten Branch `release` ausgelöst. Er liest die
-SemVer-Version aus `package.json`, baut die Electron-Windows-Ausgabe und
-erstellt daraus ein GitHub Release mit dem Tag `v<version>`. Der Installer
-wird direkt als Asset an dieses Release angehängt; ein separater Tag-Push ist
-nicht erforderlich.
+bei jedem Push eines Tags im Format `v<version>` ausgelöst. Die Tag-Version muss
+der SemVer-Version in `package.json` entsprechen. Tags mit einem
+Prerelease-Suffix wie `v1.2.3-beta.1` werden automatisch als GitHub-Prerelease
+markiert. Der Workflow verwendet Electron Builder für die Windows-NSIS-Ausgabe
+und hängt den Installer direkt als Asset an dieses Release an. Bei Prereleases
+wird die Projektverwaltung übersprungen; Issues und Pull Requests bleiben dort
+unverändert. Erst ein reguläres Release verschiebt erledigte Items nach
+`Released`.
 
 Für die Projektverwaltung muss im Repository die Variable `PROJECT_NUMBER` mit
 der Nummer des GitHub Projects V2 gesetzt werden. Für ein Projekt, dessen
@@ -159,7 +161,16 @@ Besitzer nicht dem Repository-Besitzer entspricht, kann zusätzlich
 einen Milestone und verschiebt alle Issues und Pull Requests des Projekts, die
 den Status `Done` haben, nach `Released` und weist ihnen diesen Milestone zu.
 
-Das ausführende Token benötigt Zugriff auf das Projekt sowie Schreibrechte für die betroffenen Repositories. Da Milestones repositorybezogen sind, wird bei Items aus mehreren Repositories in jedem dieser Repositories ein Milestone mit demselben Release-Namen verwendet. Bei einem organisationsweiten Projekt muss gegebenenfalls ein eigenes Repository-Secret mit einem passenden Token verwendet und im Workflow als `GH_TOKEN` gesetzt werden.
+Für die Projektverwaltung muss zusätzlich das Repository-Secret
+`PROJECT_TOKEN` (alternativ `RELEASE_TOKEN`) gesetzt werden. Es muss Zugriff auf
+das Projekt und Schreibrechte für die betroffenen Repositories besitzen. Der
+automatische `GITHUB_TOKEN` hat keinen Zugriff auf benutzerbezogene Projects-V2
+und ist deshalb kein gültiger Ersatz. Bei einem klassischen Personal Access
+Token werden dafür mindestens die Scopes `project` und `repo` benötigt; bei
+feingranularen Tokens müssen das Projekt sowie die betroffenen Repositories mit
+Schreibrechten freigegeben sein. Da Milestones repositorybezogen sind, wird bei
+Items aus mehreren Repositories in jedem dieser Repositories ein Milestone mit
+demselben Release-Namen verwendet.
 
 ## Projektstruktur
 
