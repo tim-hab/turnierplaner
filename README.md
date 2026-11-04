@@ -48,7 +48,14 @@ Unit-Tests einmalig ausführen:
 npm test -- --watch=false
 ```
 
-Der Testbestand enthält derzeit noch einige ältere Fixture-Tests, die vor einem vollständig grünen Lauf aktualisiert werden müssen.
+Electron-Main-/Preload-, SQLite-Migrations- und IPC-Bridge-Tests ausführen:
+
+```bash
+npm run test:electron
+```
+
+Der Angular-Testlauf umfasst die Renderer- und Fachlogik; die Electron-Schicht
+wird mit `npm run test:electron` separat geprüft.
 
 ## Builds
 
@@ -68,6 +75,16 @@ Der Befehl kompiliert zunächst Angular und den Electron Main-/Preload-Prozess
 getrennt und erstellt anschließend einen Windows-NSIS-Installer unter
 `release/`. Der Produktionsmodus lädt die Angular-Dateien aus `dist/`, während
 `electron:dev` ausschließlich den Dev Server verwendet.
+
+Für einen signierten Produktionsinstaller müssen `CSC_LINK` und
+`CSC_KEY_PASSWORD` in der Windows-Build-Umgebung gesetzt sein. Ohne diese
+Variablen meldet electron-builder den Build zwar als erfolgreich paketiert,
+überspringt aber die Codesignatur; ein solcher Installer darf nicht als
+Release-Artefakt veröffentlicht werden. Der vollständige Installer-,
+Upgrade-, Wiederherstellungs- und Offline-Test muss auf einem sauberen
+Windows-System ausgeführt werden. Dabei sind insbesondere die stabile App-ID,
+die Datenbank im Benutzerverzeichnis, JSON-Import/-Export ohne Netzwerk und
+der Erhalt bestehender Turniere nach dem Upgrade zu prüfen.
 
 Die Electron-App stellt ein natives Datei- und Hilfe-Menü mit Neu, Import,
 Export, Beenden, Updateprüfung und einem Über-Dialog bereit. Fenstergröße und
