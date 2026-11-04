@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { TournamentRepository, TournamentSnapshot } from './tournament-repository';
+import {
+  TournamentRepository,
+  TournamentSnapshot,
+  TournamentSummary,
+} from './tournament-repository';
 
 const STORAGE_KEY = 'turnierplaner-state';
 
@@ -8,8 +12,8 @@ export class JsonTournamentRepository extends TournamentRepository {
   async load(): Promise<TournamentSnapshot | null> {
     const result: { content?: string | null; error?: string } =
       window.electron?.isAvailable && window.electron.loadTournamentState
-      ? await window.electron.loadTournamentState()
-      : { content: localStorage.getItem(STORAGE_KEY) };
+        ? await window.electron.loadTournamentState()
+        : { content: localStorage.getItem(STORAGE_KEY) };
 
     if (result.error) {
       console.error(result.error);
@@ -27,6 +31,17 @@ export class JsonTournamentRepository extends TournamentRepository {
     }
   }
 
+  async list(): Promise<TournamentSummary[]> {
+    const snapshot = await this.load();
+    return snapshot
+      ? [{ id: 1, updatedAt: '', round: snapshot.round, running: snapshot.running }]
+      : [];
+  }
+
+  async loadById(id: number): Promise<TournamentSnapshot | null> {
+    return id === 1 ? this.load() : null;
+  }
+
   async save(snapshot: TournamentSnapshot): Promise<void> {
     const content = JSON.stringify(snapshot);
     if (window.electron?.isAvailable && window.electron.saveTournamentState) {
@@ -37,5 +52,9 @@ export class JsonTournamentRepository extends TournamentRepository {
       return;
     }
     localStorage.setItem(STORAGE_KEY, content);
+  }
+
+  async saveAsNew(snapshot: TournamentSnapshot): Promise<void> {
+    return this.save(snapshot);
   }
 }

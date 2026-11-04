@@ -69,6 +69,13 @@ getrennt und erstellt anschließend einen Windows-NSIS-Installer unter
 `release/`. Der Produktionsmodus lädt die Angular-Dateien aus `dist/`, während
 `electron:dev` ausschließlich den Dev Server verwendet.
 
+Die Electron-App stellt ein natives Datei- und Hilfe-Menü mit Neu, Import,
+Export, Beenden, Updateprüfung und einem Über-Dialog bereit. Fenstergröße und
+-position werden pro Benutzer gespeichert. Beim Beenden erkennt die App
+ungespeicherte Änderungen und bietet Speichern, Verwerfen oder Abbrechen an.
+Entwicklerwerkzeuge sind ausschließlich im Entwicklungsmodus verfügbar;
+externe Links werden kontrolliert im Standardbrowser geöffnet.
+
 Im Release-Workflow wird die Paketversion aus `package.json` des Branches
 `release` übernommen. Die Versionsänderung muss daher vor dem Release in
 `package.json` und `package-lock.json` committed werden. Ein Commit oder Merge
@@ -156,11 +163,11 @@ Die Angular-Anwendung verwendet Standalone-Komponenten. Die Aliase `@core/*` und
 
 Die Anwendung verwendet den Angular Router mit Hash-URLs:
 
-| URL | Ansicht |
-| --- | --- |
+| URL           | Ansicht                          |
+| ------------- | -------------------------------- |
 | `/#/settings` | Turniereinstellungen und Spieler |
-| `/#/fields` | Spielfelder und Spielhistorie |
-| `/#/table` | Live-Tabelle |
+| `/#/fields`   | Spielfelder und Spielhistorie    |
+| `/#/table`    | Live-Tabelle                     |
 
 Die drei Ansichten werden als lazy geladene Standalone-Seiten eingebunden. Die gemeinsame App-Shell mit Sidebar, Turniersteuerung und `router-outlet` bleibt beim Navigieren bestehen. `/` und unbekannte URLs leiten auf `/#/settings` weiter.
 

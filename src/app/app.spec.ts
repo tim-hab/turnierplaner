@@ -1,12 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { App } from './app';
+import { TournamentRepository } from './core/repositories/tournament-repository';
+import { SqliteTournamentRepository } from './core/repositories/sqlite-tournament-repository';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: TournamentRepository, useClass: SqliteTournamentRepository },
+      ],
     }).compileComponents();
   });
 

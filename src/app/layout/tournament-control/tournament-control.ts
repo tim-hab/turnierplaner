@@ -103,8 +103,22 @@ export class TournamentControl {
   }
 
   newTournament() {
-    this.exportService.importPlayerData(this.exportService.generateJsonString());
-    void this.router.navigate(['/settings']);
+    this.dialogService
+      .openMessageDialog('Sollen die Spielerdaten übernommen werden?', 'Spieler übernehmen')
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((keepPlayers: boolean) => {
+        if (keepPlayers) {
+          this.exportService.importPlayerData(this.exportService.generateJsonString());
+        } else {
+          this.playerService.reset();
+          this.tournamentService.reset();
+        }
+        void this.exportService.saveAsNewTournament().catch((error: unknown) => {
+          console.error('Das neue Turnier konnte nicht gespeichert werden.', error);
+        });
+        void this.router.navigate(['/settings']);
+      });
   }
 
   nextRound() {

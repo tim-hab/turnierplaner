@@ -107,7 +107,10 @@ describe('ExportJsonService', () => {
   });
 
   it('opens import dialog after successful file import', async () => {
-    fileStorageService.openJsonFile.mockResolvedValue({ canceled: false, content: '{"player":[],"clubs":[]}' });
+    fileStorageService.openJsonFile.mockResolvedValue({
+      canceled: false,
+      content: '{"player":[],"clubs":[]}',
+    });
 
     await service.importJsonFromFile();
 
@@ -152,7 +155,9 @@ describe('ExportJsonService', () => {
 
     await service.exportJsonToFile();
 
-    expect(dialogService.openMessageDialog).toHaveBeenCalledWith('Die Datei konnte nicht gespeichert werden.');
+    expect(dialogService.openMessageDialog).toHaveBeenCalledWith(
+      'Die Datei konnte nicht gespeichert werden.',
+    );
   });
 
   it('does not show an error when file export is canceled', async () => {

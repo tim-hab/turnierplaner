@@ -102,4 +102,27 @@ describe('TournamentService', () => {
     expect(service.running()).toBe(false);
     expect(player.points).toBe(63);
   });
+
+  it('keeps points finite for players without played matches', () => {
+    const players = [
+      {
+        id: 0,
+        name: 'Player',
+        club: 'Club',
+        elo: 500,
+        wins: 0,
+        losses: 0,
+        frees: 1,
+        played: 0,
+        points: 0,
+        active: true,
+      },
+    ];
+    TestBed.inject(PlayerService).loadPlayerData(players, []);
+
+    service.endTournament();
+
+    expect(players[0].points).toBe(0);
+    expect(Number.isFinite(players[0].points)).toBe(true);
+  });
 });

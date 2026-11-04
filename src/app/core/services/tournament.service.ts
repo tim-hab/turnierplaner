@@ -127,7 +127,8 @@ export class TournamentService {
   endTournament() {
     this.runningSignal.set(false);
     this.playerService.player().forEach((player) => {
-      const averageScorePerMatch = Math.round(player.points / player.played) ?? 0;
+      const averageScorePerMatch =
+        player.played > 0 ? Math.round(player.points / player.played) : 0;
       player.points += averageScorePerMatch * player.frees;
     });
   }
@@ -145,5 +146,15 @@ export class TournamentService {
     this.totalRoundsSignal.set(totalRounds);
     this.runningSignal.set(running);
     this.newID = this.matchesSignal().length;
+  }
+
+  reset() {
+    this.newID = 0;
+    this.matchesSignal.set([]);
+    this.historySignal.set([]);
+    this.roundSignal.set(0);
+    this.totalRoundsSignal.set(5);
+    this.runningSignal.set(true);
+    this.freePlayersSignal.set([]);
   }
 }
