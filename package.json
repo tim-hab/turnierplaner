@@ -11,6 +11,7 @@
     "electron:dist": "npm run electron:build && electron-builder --win --publish never",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:electron": "vitest run electron/*.spec.ts",
     "lint": "ng lint"
   },
   "private": true,

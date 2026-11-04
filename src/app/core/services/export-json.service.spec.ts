@@ -106,6 +106,30 @@ describe('ExportJsonService', () => {
     expect(dialogService.openMessageDialog).toHaveBeenCalled();
   });
 
+  it('reports duplicate player ids without replacing the current tournament', () => {
+    TestBed.inject(PlayerService).addNewPlayer('Existing', 'Club', 600);
+    const input = JSON.stringify({
+      version: 'v1.0.0',
+      player: [
+        { id: 1, name: 'Alice', club: 'Club', elo: 600, active: true },
+        { id: 1, name: 'Bob', club: 'Club', elo: 600, active: true },
+      ],
+      clubs: ['Club'],
+      matches: [],
+      history: [],
+      round: 0,
+      totalRounds: 5,
+      running: true,
+    });
+
+    service.importJsonString(input);
+
+    expect(dialogService.openMessageDialog).toHaveBeenCalledWith(
+      'Matches could not be loaded because there is a duplicate player id. Please consider to only load player data.',
+    );
+    expect(TestBed.inject(PlayerService).player()).toHaveLength(1);
+  });
+
   it('opens import dialog after successful file import', async () => {
     fileStorageService.openJsonFile.mockResolvedValue({
       canceled: false,

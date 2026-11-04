@@ -9,5 +9,5 @@
     "noEmit": false
   },
   "include": ["electron/**/*.ts"],
-  "exclude": []
+  "exclude": ["electron/**/*.spec.ts"]
 }
