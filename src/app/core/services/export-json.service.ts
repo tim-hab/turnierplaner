@@ -3,14 +3,10 @@ import { PlayerService } from './player.service';
 import { TournamentService } from './tournament.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { devPlayers, Player } from '../datatypes/player';
-import {
-  mapMatchExportToMatch,
-  mapMatchToMatchExport,
-  Match,
-} from '../datatypes/match';
+import { mapMatchExportToMatch, mapMatchToMatchExport, Match } from '../datatypes/match';
 import { DialogService } from './dialog.service';
 import { FileStorageService } from './file-storage.service';
-import { TournamentSnapshot } from '../repositories/tournament-repository';
+import { TournamentRepository, TournamentSnapshot } from '../repositories/tournament-repository';
 
 interface Content {
   player: Player[];
@@ -50,6 +46,7 @@ export class ExportJsonService {
   private tournamentService = inject(TournamentService);
   private readonly dialogService = inject(DialogService);
   private readonly fileStorage = inject(FileStorageService);
+  private readonly repository = inject(TournamentRepository, { optional: true });
   private readonly EXPORT_VERSION = 'v1.0.0';
 
   //dev settings
@@ -97,6 +94,49 @@ export class ExportJsonService {
     if (result.error) {
       console.error(result.error);
       this.dialogService.openMessageDialog(result.error);
+    }
+  }
+
+  async loadTournamentFromDatabase(): Promise<void> {
+    try {
+      if (!this.repository) {
+        throw new Error('Die Turnierdatenbank ist nicht verfügbar.');
+      }
+
+      const tournaments = await this.repository.list();
+      const dialog = this.dialogService.openLoadTournamentDialog(tournaments);
+      dialog.afterClosed().subscribe((id: number | undefined) => {
+        if (id !== undefined) {
+          void this.loadTournamentById(id);
+        }
+      });
+    } catch (error: unknown) {
+      console.error('Die Turnierliste konnte nicht geladen werden.', error);
+      this.dialogService.openMessageDialog('Die Turnierliste konnte nicht geladen werden.');
+    }
+  }
+
+  async saveAsNewTournament(): Promise<void> {
+    if (!this.repository) {
+      throw new Error('Die Turnierdatenbank ist nicht verfügbar.');
+    }
+    await this.repository.saveAsNew(this.createSnapshot());
+  }
+
+  private async loadTournamentById(id: number): Promise<void> {
+    try {
+      if (!this.repository) {
+        throw new Error('Die Turnierdatenbank ist nicht verfügbar.');
+      }
+      const snapshot = await this.repository.loadById(id);
+      if (!snapshot) {
+        this.dialogService.openMessageDialog('Das ausgewählte Turnier wurde nicht gefunden.');
+        return;
+      }
+      this.importJsonString(JSON.stringify(snapshot));
+    } catch (error: unknown) {
+      console.error('Das Turnier konnte nicht geladen werden.', error);
+      this.dialogService.openMessageDialog('Das ausgewählte Turnier konnte nicht geladen werden.');
     }
   }
 

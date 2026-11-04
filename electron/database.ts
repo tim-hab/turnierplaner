@@ -44,6 +44,13 @@ interface TournamentRow {
   running: number;
 }
 
+export interface TournamentSummary {
+  id: number;
+  updatedAt: string;
+  round: number;
+  running: boolean;
+}
+
 interface PlayerRow extends Omit<Player, 'active'> {
   tournament_id: number;
   active: number;
@@ -75,12 +82,32 @@ export class TournamentDatabase {
   }
 
   load(): string | null {
+    return this.loadById();
+  }
+
+  list(): TournamentSummary[] {
+    const tournaments = this.database
+      .prepare(
+        `SELECT id, round, running, updated_at
+         FROM tournaments ORDER BY updated_at DESC, id DESC`,
+      )
+      .all() as { id: number; round: number; running: number; updated_at: string }[];
+    return tournaments.map((tournament) => ({
+      id: tournament.id,
+      updatedAt: tournament.updated_at,
+      round: tournament.round,
+      running: Boolean(tournament.running),
+    }));
+  }
+
+  loadById(id?: number): string | null {
     const tournament = this.database
       .prepare(
         `SELECT id, version, round, total_rounds, running
-         FROM tournaments ORDER BY updated_at DESC, id DESC LIMIT 1`,
+         FROM tournaments
+         ${id === undefined ? 'ORDER BY updated_at DESC, id DESC LIMIT 1' : 'WHERE id = ?'}`,
       )
-      .get() as TournamentRow | undefined;
+      .get(...(id === undefined ? [] : [id])) as TournamentRow | undefined;
     if (!tournament) {
       return null;
     }
@@ -99,7 +126,7 @@ export class TournamentDatabase {
 
     return JSON.stringify({
       version: tournament.version,
-      player: players.map(({ tournament_id: _tournamentId, active, ...player }) => ({
+      player: players.map(({ active, ...player }) => ({
         ...player,
         active: Boolean(active),
       })),
@@ -132,19 +159,17 @@ export class TournamentDatabase {
              running = excluded.running,
              updated_at = excluded.updated_at`,
         )
-        .run(
-          id,
-          parsed.version,
-          parsed.round,
-          parsed.totalRounds,
-          parsed.running ? 1 : 0,
-        );
+        .run(id, parsed.version, parsed.round, parsed.totalRounds, parsed.running ? 1 : 0);
       this.replaceTournamentData(id, parsed);
       this.database.exec('COMMIT');
     } catch (error: unknown) {
       this.database.exec('ROLLBACK');
       throw error;
     }
+  }
+
+  saveAsNew(snapshot: string): void {
+    this.save(snapshot, this.nextTournamentId());
   }
 
   createTournament(snapshot: string): number {
@@ -242,14 +267,18 @@ export class TournamentDatabase {
   }
 
   private nextTournamentId(): number {
-    const row = this.database.prepare('SELECT COALESCE(MAX(id), 0) + 1 AS id FROM tournaments').get() as {
+    const row = this.database
+      .prepare('SELECT COALESCE(MAX(id), 0) + 1 AS id FROM tournaments')
+      .get() as {
       id: number;
     };
     return row.id;
   }
 
   private migrate(): void {
-    const versionRow = this.database.prepare('PRAGMA user_version').get() as { user_version: number };
+    const versionRow = this.database.prepare('PRAGMA user_version').get() as {
+      user_version: number;
+    };
     const currentVersion = versionRow.user_version;
     for (const migration of migrations.filter((item) => item.version > currentVersion)) {
       this.database.exec('BEGIN IMMEDIATE');
@@ -268,7 +297,9 @@ export class TournamentDatabase {
     const legacy = this.database
       .prepare('SELECT snapshot_json FROM tournament_state WHERE id = 1')
       .get() as { snapshot_json: string } | undefined;
-    const count = this.database.prepare('SELECT COUNT(*) AS count FROM tournaments').get() as { count: number };
+    const count = this.database.prepare('SELECT COUNT(*) AS count FROM tournaments').get() as {
+      count: number;
+    };
     if (!legacy || count.count > 0) {
       return;
     }
@@ -276,7 +307,9 @@ export class TournamentDatabase {
   }
 
   private assertIntegrity(): void {
-    const result = this.database.prepare('PRAGMA integrity_check').get() as { integrity_check: string };
+    const result = this.database.prepare('PRAGMA integrity_check').get() as {
+      integrity_check: string;
+    };
     if (result.integrity_check !== 'ok') {
       throw new Error(`SQLite integrity check failed: ${result.integrity_check}`);
     }

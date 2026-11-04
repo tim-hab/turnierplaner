@@ -12,7 +12,17 @@ export interface TournamentSnapshot {
   running: boolean;
 }
 
+export interface TournamentSummary {
+  id: number;
+  updatedAt: string;
+  round: number;
+  running: boolean;
+}
+
 export abstract class TournamentRepository {
   abstract load(): Promise<TournamentSnapshot | null>;
+  abstract list(): Promise<TournamentSummary[]>;
+  abstract loadById(id: number): Promise<TournamentSnapshot | null>;
   abstract save(snapshot: TournamentSnapshot): Promise<void>;
+  abstract saveAsNew(snapshot: TournamentSnapshot): Promise<void>;
 }
