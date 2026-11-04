@@ -1,0 +1,21 @@
+<mat-dialog-content>
+  @if (tournaments.length === 0) {
+    <p>Es sind keine gespeicherten Turniere vorhanden.</p>
+  } @else {
+    <div class="buttons">
+      @for (tournament of tournaments; track tournament.id) {
+        <button matButton="outlined" (click)="select(tournament.id)">
+          Turnier {{ tournament.id }} –
+          @if (tournament.round === 0) {
+            noch nicht gestartet
+          } @else {
+            Runde {{ tournament.round }} ({{ tournament.running ? 'laufend' : 'beendet' }})
+          }
+        </button>
+      }
+    </div>
+  }
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton="text" (click)="close()">Abbrechen</button>
+</mat-dialog-actions>

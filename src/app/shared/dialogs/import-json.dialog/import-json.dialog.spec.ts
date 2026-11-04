@@ -14,7 +14,10 @@ describe('ImportJsonDialog', () => {
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: '{"player":[],"clubs":[]}' },
         { provide: MatDialogRef, useValue: { close: vi.fn() } },
-        { provide: ExportJsonService, useValue: { importPlayerData: vi.fn(), importJsonString: vi.fn() } },
+        {
+          provide: ExportJsonService,
+          useValue: { importPlayerData: vi.fn(), importJsonString: vi.fn() },
+        },
       ],
     }).compileComponents();
 

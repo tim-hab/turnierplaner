@@ -1,0 +1,29 @@
+appId: de.timhab.turnierplaner
+productName: Turnierplaner
+
+directories:
+  output: release
+
+toolsets:
+  wine: 1.0.1
+
+files:
+  - electron-dist/**/*
+  - dist/turnierplaner/browser/**/*
+  - package.json
+
+win:
+  icon: build/icon.svg
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  perMachine: true
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Turnierplaner

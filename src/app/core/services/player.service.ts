@@ -114,6 +114,12 @@ export class PlayerService {
     this.clubsSignal.set(clubs);
   }
 
+  reset() {
+    this.newID = 0;
+    this.playerSignal.set([]);
+    this.clubsSignal.set([]);
+  }
+
   updatePlayerName(newPlayerName: string, player: Player) {
     player.name = newPlayerName;
     this.playerSignal.update((l) => [...l]);

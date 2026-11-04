@@ -3,13 +3,10 @@ import { PlayerService } from './player.service';
 import { TournamentService } from './tournament.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { devPlayers, Player } from '../datatypes/player';
-import {
-  mapMatchExportToMatch,
-  mapMatchToMatchExport,
-  Match,
-  MatchExport,
-} from '../datatypes/match';
+import { mapMatchExportToMatch, mapMatchToMatchExport, Match } from '../datatypes/match';
 import { DialogService } from './dialog.service';
+import { FileStorageService } from './file-storage.service';
+import { TournamentRepository, TournamentSnapshot } from '../repositories/tournament-repository';
 
 interface Content {
   player: Player[];
@@ -21,16 +18,7 @@ interface Content {
   running: boolean;
 }
 
-interface JsonContent {
-  version: string;
-  player: Player[];
-  clubs: string[];
-  matches: MatchExport[];
-  history: MatchExport[];
-  round: number;
-  totalRounds: number;
-  running: boolean;
-}
+type JsonContent = TournamentSnapshot;
 
 class MatchLoadingError extends Error {
   constructor() {
@@ -57,6 +45,8 @@ export class ExportJsonService {
   private playerService = inject(PlayerService);
   private tournamentService = inject(TournamentService);
   private readonly dialogService = inject(DialogService);
+  private readonly fileStorage = inject(FileStorageService);
+  private readonly repository = inject(TournamentRepository, { optional: true });
   private readonly EXPORT_VERSION = 'v1.0.0';
 
   //dev settings
@@ -65,32 +55,89 @@ export class ExportJsonService {
   // }
 
   generateJsonString(): string {
-    const player = this.playerService.player();
-    const clubs = this.playerService.clubs();
-    const matches = this.tournamentService.matches().map((m) => mapMatchToMatchExport(m));
-    const history = this.tournamentService.history().map((m) => mapMatchToMatchExport(m));
-    const round = this.tournamentService.round();
-    const totalRounds = this.tournamentService.totalRounds();
-    const running = this.tournamentService.running();
-
-    return JSON.stringify({
-      version: this.EXPORT_VERSION,
-      player: player,
-      clubs: clubs,
-      matches: matches,
-      history: history,
-      round: round,
-      totalRounds: totalRounds,
-      running: running,
-    } as JsonContent);
+    return JSON.stringify(this.createSnapshot());
   }
 
-  generateJsonFile() {
-    return URL.createObjectURL(
-      new File([this.generateJsonString()], 'turnier.json', {
-        type: 'application/json',
-      }),
-    );
+  createSnapshot(): TournamentSnapshot {
+    return {
+      version: this.EXPORT_VERSION,
+      player: this.playerService.player(),
+      clubs: this.playerService.clubs(),
+      matches: this.tournamentService.matches().map((m) => mapMatchToMatchExport(m)),
+      history: this.tournamentService.history().map((m) => mapMatchToMatchExport(m)),
+      round: this.tournamentService.round(),
+      totalRounds: this.tournamentService.totalRounds(),
+      running: this.tournamentService.running(),
+    };
+  }
+
+  async importJsonFromFile() {
+    const result = await this.fileStorage.openJsonFile();
+    if (result.canceled) {
+      return;
+    }
+    if (!result.content) {
+      const message = result.error ?? 'Datei konnte nicht gelesen werden.';
+      console.error(message);
+      this.dialogService.openMessageDialog(message);
+      return;
+    }
+
+    this.dialogService.openImportDialog(result.content);
+  }
+
+  async exportJsonToFile() {
+    const result = await this.fileStorage.saveJsonFile(this.generateJsonString());
+    if (result.canceled) {
+      return;
+    }
+    if (result.error) {
+      console.error(result.error);
+      this.dialogService.openMessageDialog(result.error);
+    }
+  }
+
+  async loadTournamentFromDatabase(): Promise<void> {
+    try {
+      if (!this.repository) {
+        throw new Error('Die Turnierdatenbank ist nicht verfügbar.');
+      }
+
+      const tournaments = await this.repository.list();
+      const dialog = this.dialogService.openLoadTournamentDialog(tournaments);
+      dialog.afterClosed().subscribe((id: number | undefined) => {
+        if (id !== undefined) {
+          void this.loadTournamentById(id);
+        }
+      });
+    } catch (error: unknown) {
+      console.error('Die Turnierliste konnte nicht geladen werden.', error);
+      this.dialogService.openMessageDialog('Die Turnierliste konnte nicht geladen werden.');
+    }
+  }
+
+  async saveAsNewTournament(): Promise<void> {
+    if (!this.repository) {
+      throw new Error('Die Turnierdatenbank ist nicht verfügbar.');
+    }
+    await this.repository.saveAsNew(this.createSnapshot());
+  }
+
+  private async loadTournamentById(id: number): Promise<void> {
+    try {
+      if (!this.repository) {
+        throw new Error('Die Turnierdatenbank ist nicht verfügbar.');
+      }
+      const snapshot = await this.repository.loadById(id);
+      if (!snapshot) {
+        this.dialogService.openMessageDialog('Das ausgewählte Turnier wurde nicht gefunden.');
+        return;
+      }
+      this.importJsonString(JSON.stringify(snapshot));
+    } catch (error: unknown) {
+      console.error('Das Turnier konnte nicht geladen werden.', error);
+      this.dialogService.openMessageDialog('Das ausgewählte Turnier konnte nicht geladen werden.');
+    }
   }
 
   importJsonString(input: string) {

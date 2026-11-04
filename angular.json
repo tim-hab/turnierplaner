@@ -24,12 +24,18 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/fonts",
+                "output": "fonts"
               }
             ],
             "styles": ["src/material-theme.scss", "src/styles.css"]
           },
           "configurations": {
             "production": {
+              "baseHref": "./",
               "budgets": [
                 {
                   "type": "initial",

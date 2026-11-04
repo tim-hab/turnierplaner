@@ -1,5 +1,4 @@
-<!-- eslint-disable-next-line @angular-eslint/template/elements-content -->
-<a class="file-download" download="turnier.json" #fileDownload></a>
-<button matButton="filled" class="btn btn-secondary" (click)="exportJsonFile(fileDownload)">
-  📥 Export JSON
+<button matButton="filled" class="btn btn-secondary" (click)="exportJsonFile()">
+  <mat-icon aria-hidden="true">file_download</mat-icon>
+  Export JSON
 </button>

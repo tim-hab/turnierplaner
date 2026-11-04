@@ -1,12 +1,4 @@
-<input
-  type="file"
-  accept=".json"
-  multiple="false"
-  class="file-input"
-  (change)="onFileSelected(fileUpload)"
-  #fileUpload
-/>
-
-<button matButton="filled" class="btn btn-secondary" (click)="fileUpload.click()">
-  📥 Import JSON
+<button matButton="filled" class="btn btn-secondary" (click)="importJsonFile()">
+  <mat-icon aria-hidden="true">file_upload</mat-icon>
+  Import JSON
 </button>
