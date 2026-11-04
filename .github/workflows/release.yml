@@ -2,8 +2,8 @@ name: Build and release
 
 on:
   push:
-    branches:
-      - release
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -35,12 +35,28 @@ jobs:
           set -euo pipefail
 
           version="$(node -p "require('./package.json').version")"
+          lock_version="$(node -p "require('./package-lock.json').version")"
           if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
             echo "::error::package.json must contain a semantic version such as 1.2.3."
             exit 1
           fi
+          if [[ "${version}" != "${lock_version}" ]]; then
+            echo "::error::package.json version ${version} does not match package-lock.json version ${lock_version}."
+            exit 1
+          fi
 
-          echo "RELEASE_NAME=v${version}" >> "${GITHUB_ENV}"
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::The tag must contain a semantic version such as v1.2.3."
+            exit 1
+          fi
+
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [[ "${version}" != "${tag_version}" ]]; then
+            echo "::error::The tag version ${tag_version} does not match package.json version ${version}."
+            exit 1
+          fi
+
+          echo "RELEASE_NAME=${GITHUB_REF_NAME}" >> "${GITHUB_ENV}"
 
       - name: Install dependencies
         run: npm ci
@@ -65,21 +81,37 @@ jobs:
             exit 1
           fi
 
-          gh release create "${RELEASE_NAME}" "${files[@]}" \
-            --repo "${GITHUB_REPOSITORY}" \
-            --target "${GITHUB_SHA}" \
-            --title "${RELEASE_NAME}" \
+          release_args=(
+            "${RELEASE_NAME}"
+            "${files[@]}"
+            --repo "${GITHUB_REPOSITORY}"
+            --target "${GITHUB_SHA}"
+            --title "${RELEASE_NAME}"
             --generate-notes
+          )
+          if [[ "${RELEASE_NAME}" == *-* ]]; then
+            release_args+=(--prerelease)
+          fi
+
+          gh release create "${release_args[@]}"
 
       - name: Move done project items to released
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN || secrets.RELEASE_TOKEN }}
         run: |
           set -euo pipefail
 
           if [[ -z "${PROJECT_NUMBER}" ]]; then
             echo "::error::Set the PROJECT_NUMBER repository variable."
             exit 1
+          fi
+          if [[ -z "${GH_TOKEN}" ]]; then
+            echo "::error::Set the PROJECT_TOKEN secret (or RELEASE_TOKEN) to a token with access to the GitHub Projects V2 project. The GITHUB_TOKEN cannot access user-owned projects."
+            exit 1
+          fi
+          if [[ "${RELEASE_NAME}" == *-* ]]; then
+            echo "Skipping project updates for prerelease ${RELEASE_NAME}."
+            exit 0
           fi
 
           owner_type="$(gh api "users/${PROJECT_OWNER}" --jq '.type')"
