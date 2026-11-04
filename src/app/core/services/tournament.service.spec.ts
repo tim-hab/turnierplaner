@@ -125,4 +125,47 @@ describe('TournamentService', () => {
     expect(players[0].points).toBe(0);
     expect(Number.isFinite(players[0].points)).toBe(true);
   });
+
+  it('ends an empty current round using the previous round matches', () => {
+    const playerService = TestBed.inject(PlayerService);
+    const previousMatch = {
+      id: 1,
+      round: 1,
+      field: 1,
+      teamA: [],
+      teamB: [],
+      prob: { A: '50', B: '50' },
+      completed: true,
+    } as unknown as Match;
+    const currentMatch = { ...previousMatch, id: 2, round: 2, completed: false };
+
+    playerService.loadPlayerData([], []);
+    service.loadTournamentData([currentMatch], [previousMatch], 2, 5, true);
+
+    expect(service.endTournament()).toBe(true);
+    expect(service.round()).toBe(1);
+    expect(service.matches()).toEqual([previousMatch]);
+    expect(service.history()).toEqual([previousMatch]);
+  });
+
+  it('refuses to end when only some current round matches are completed', () => {
+    const dialog = TestBed.inject(MatDialog);
+    const previousMatch = {
+      id: 1,
+      round: 1,
+      field: 1,
+      teamA: [],
+      teamB: [],
+      prob: { A: '50', B: '50' },
+      completed: true,
+    } as unknown as Match;
+    const completedMatch = { ...previousMatch, id: 2, round: 2 };
+    const incompleteMatch = { ...previousMatch, id: 3, round: 2, completed: false };
+
+    service.loadTournamentData([completedMatch, incompleteMatch], [previousMatch], 2, 5, true);
+
+    expect(service.endTournament()).toBe(false);
+    expect(service.running()).toBe(true);
+    expect(dialog.open).toHaveBeenCalled();
+  });
 });

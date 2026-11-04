@@ -82,6 +82,10 @@ export class TournamentControl {
   }
 
   endTournament() {
+    if (!this.tournamentService.canEndTournament()) {
+      return;
+    }
+
     if (this.tournamentService.round() < this.tournamentService.totalRounds()) {
       this.dialogService
         .openMessageDialog(
@@ -92,13 +96,15 @@ export class TournamentControl {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((accepted: boolean) => {
           if (accepted) {
-            this.tournamentService.endTournament();
-            void this.router.navigate(['/table']);
+            if (this.tournamentService.endTournament()) {
+              void this.router.navigate(['/table']);
+            }
           }
         });
     } else {
-      this.tournamentService.endTournament();
-      void this.router.navigate(['/table']);
+      if (this.tournamentService.endTournament()) {
+        void this.router.navigate(['/table']);
+      }
     }
   }
 

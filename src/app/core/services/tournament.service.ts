@@ -125,12 +125,39 @@ export class TournamentService {
   }
 
   endTournament() {
+    if (!this.canEndTournament()) {
+      return false;
+    }
+
+    const currentMatches = this.matchesSignal();
+    const hasCompletedMatch = currentMatches.some((match) => match.completed);
+    const allMatchesCompleted = currentMatches.every((match) => match.completed);
+    if (!allMatchesCompleted && !hasCompletedMatch) {
+      const previousRound = Math.max(0, this.roundSignal() - 1);
+      this.roundSignal.set(previousRound);
+      this.matchesSignal.set(this.historySignal().filter((match) => match.round === previousRound));
+    }
+
     this.runningSignal.set(false);
     this.playerService.player().forEach((player) => {
       const averageScorePerMatch =
         player.played > 0 ? Math.round(player.points / player.played) : 0;
       player.points += averageScorePerMatch * player.frees;
     });
+    return true;
+  }
+
+  canEndTournament() {
+    const currentMatches = this.matchesSignal();
+    const hasCompletedMatch = currentMatches.some((match) => match.completed);
+    const hasIncompleteMatch = currentMatches.some((match) => !match.completed);
+    if (hasCompletedMatch && hasIncompleteMatch) {
+      this.dialogService.openMessageDialog(
+        'Das Turnier kann erst beendet werden, wenn alle Spiele der aktuellen Runde beendet wurden.',
+      );
+      return false;
+    }
+    return true;
   }
 
   loadTournamentData(
