@@ -12,6 +12,10 @@ files:
   - dist/turnierplaner/browser/**/*
   - package.json
 
+extraResources:
+  - from: LICENSE
+    to: LICENSE
+
 win:
   icon: build/icon.svg
   target:
@@ -20,6 +24,7 @@ win:
         - x64
 
 nsis:
+  license: LICENSE
   oneClick: false
   perMachine: true
   allowElevation: true
