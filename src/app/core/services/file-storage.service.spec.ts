@@ -15,15 +15,12 @@ describe('FileStorageService', () => {
     window.electron = originalElectron;
   });
 
-  it('returns an error when electron api is unavailable for import', async () => {
+  it('can cancel browser import when no file API is available', async () => {
     window.electron = undefined;
 
     const result = await service.openJsonFile();
 
-    expect(result).toEqual({
-      canceled: false,
-      error: 'Dateiimport ist nur in der Desktop-App verfügbar.',
-    });
+    expect(result.canceled).toBe(true);
   });
 
   it('delegates import to electron api', async () => {
@@ -40,15 +37,13 @@ describe('FileStorageService', () => {
     expect(result.content).toBe('{}');
   });
 
-  it('returns an error when electron api is unavailable for export', async () => {
+  it('reports unsupported browser export when download APIs are unavailable', async () => {
     window.electron = undefined;
 
     const result = await service.saveJsonFile('{}');
 
-    expect(result).toEqual({
-      canceled: false,
-      error: 'Dateiexport ist nur in der Desktop-App verfügbar.',
-    });
+    expect(result.canceled).toBe(false);
+    expect(result.error).toBeDefined();
   });
 
   it('delegates export to electron api', async () => {

@@ -65,6 +65,19 @@ Produktions-Build erzeugen:
 npm run build
 ```
 
+Ein einzelnes, inline eingebettetes HTML-Dokument erzeugen:
+
+```bash
+npm run build-single
+```
+
+Die normale Build-Ausgabe liegt unter `dist/turnierplaner/browser/`; die
+Single-File-Ausgabe wird als `dist-single/index.html` erstellt.
+
+In der Electron-App verwenden JSON-Import und -Export weiterhin die nativen
+Dateidialoge. Beim Öffnen der Single-HTML-Datei in einem Browser werden dieselben
+Funktionen über einen Datei-Auswahldialog und einen Download-Link bereitgestellt.
+
 Windows-Installer erzeugen:
 
 ```bash
